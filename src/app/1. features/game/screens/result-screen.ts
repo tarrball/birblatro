@@ -40,9 +40,13 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
       <div class="offspring-section">
         <h3>Offspring</h3>
         <p class="offspring-explanation">
-          Based on the Punnett squares, this offspring was produced:
+          Based on the Punnett squares, these offspring were produced:
         </p>
-        <app-pigeon-card [pigeon]="offspring()!" />
+        <div class="offspring-grid">
+          @for (child of offspring(); track child.id) {
+            <app-pigeon-card [pigeon]="child" />
+          }
+        </div>
       </div>
 
       <button class="continue-button" (click)="continueGame.emit()">Continue</button>
@@ -139,6 +143,13 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
       font-size: 0.875rem;
     }
 
+    .offspring-grid {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
     .continue-button {
       background: #3b82f6;
       color: white;
@@ -160,7 +171,7 @@ export class ResultScreenComponent {
   breedingResult = input.required<BreedingResult>();
   parent1 = input.required<PigeonWithPhenotype | null>();
   parent2 = input.required<PigeonWithPhenotype | null>();
-  offspring = input.required<PigeonWithPhenotype | null>();
+  offspring = input.required<PigeonWithPhenotype[]>();
 
   continueGame = output();
 }

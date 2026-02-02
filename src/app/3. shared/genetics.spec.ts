@@ -145,15 +145,26 @@ describe('Genetics Utilities', () => {
   });
 
   describe('selectOffspring', () => {
-    it('selects the highest probability outcome', () => {
+    it('selects the top 2 highest probability outcomes by default', () => {
       const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
       const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
       const offspring = selectOffspring(outcomes);
 
-      expect(offspring.wingGenotype).toBe('Ww');
-      expect(offspring.tailGenotype).toBe('Tt');
+      expect(offspring).toHaveLength(2);
+      expect(offspring[0].wingGenotype).toBe('Ww');
+      expect(offspring[0].tailGenotype).toBe('Tt');
+    });
+
+    it('respects the count parameter', () => {
+      const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+
+      const outcomes = calculateBreedingOutcomes(parent1, parent2);
+
+      expect(selectOffspring(outcomes, 1)).toHaveLength(1);
+      expect(selectOffspring(outcomes, 3)).toHaveLength(3);
     });
 
     it('is deterministic across multiple calls', () => {

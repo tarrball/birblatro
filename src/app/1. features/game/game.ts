@@ -13,6 +13,7 @@ import {
   selectCanBreed,
   selectLastBreedingResult,
   selectOffspring,
+  selectWinningOffspring,
   startGame,
   selectParent1,
   selectParent2,
@@ -66,7 +67,7 @@ import { LoseScreenComponent } from './screens/lose-screen';
         }
       }
       @case ('win') {
-        <app-win-screen [winningPigeon]="offspring()" (playAgain)="onReset()" />
+        <app-win-screen [winningPigeon]="winningOffspring()" (playAgain)="onReset()" />
       }
       @case ('lose') {
         <app-lose-screen (tryAgain)="onReset()" />
@@ -93,7 +94,8 @@ export class GameComponent {
   goalPhenotype = toSignal(this.store.select(selectGoalPhenotype), { initialValue: { wingPhenotype: 'Large wings' as const, tailPhenotype: 'Fan tail' as const } });
   canBreed = toSignal(this.store.select(selectCanBreed), { initialValue: false });
   breedingResult = toSignal(this.store.select(selectLastBreedingResult), { initialValue: null });
-  offspring = toSignal(this.store.select(selectOffspring), { initialValue: null });
+  offspring = toSignal(this.store.select(selectOffspring), { initialValue: [] });
+  winningOffspring = toSignal(this.store.select(selectWinningOffspring), { initialValue: null });
 
   onStartGame() {
     this.store.dispatch(startGame());

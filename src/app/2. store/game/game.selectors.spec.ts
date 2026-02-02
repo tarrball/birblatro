@@ -101,24 +101,29 @@ describe('Game Selectors', () => {
   });
 
   describe('selectOffspring', () => {
-    it('returns null when no breeding result', () => {
+    it('returns empty array when no breeding result', () => {
       const state = createState({});
-      expect(selectOffspring(state)).toBeNull();
+      expect(selectOffspring(state)).toEqual([]);
     });
 
-    it('returns offspring with phenotype when breeding result exists', () => {
+    it('returns offspring array with phenotypes when breeding result exists', () => {
       const state = createState({
         lastBreedingResult: {
           wingSquare: { parent1Alleles: ['W', 'w'], parent2Alleles: ['W', 'w'], grid: ['WW', 'Ww', 'Ww', 'ww'] },
           tailSquare: { parent1Alleles: ['T', 't'], parent2Alleles: ['T', 't'], grid: ['TT', 'Tt', 'Tt', 'tt'] },
           outcomes: [],
-          offspring: { id: 'test', wingGenotype: 'Ww', tailGenotype: 'Tt' },
+          offspring: [
+            { id: 'test1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
+            { id: 'test2', wingGenotype: 'WW', tailGenotype: 'TT' },
+          ],
         },
       });
       const result = selectOffspring(state);
-      expect(result).not.toBeNull();
-      expect(result!.wingPhenotype).toBe('Medium wings');
-      expect(result!.tailPhenotype).toBe('Standard tail');
+      expect(result).toHaveLength(2);
+      expect(result[0].wingPhenotype).toBe('Medium wings');
+      expect(result[0].tailPhenotype).toBe('Standard tail');
+      expect(result[1].wingPhenotype).toBe('Large wings');
+      expect(result[1].tailPhenotype).toBe('Fan tail');
     });
   });
 

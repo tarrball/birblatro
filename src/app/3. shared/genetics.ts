@@ -159,15 +159,25 @@ export function calculateBreedingOutcomes(parent1: Pigeon, parent2: Pigeon): Bre
   );
 }
 
-// Deterministic offspring selection: pick highest probability outcome
+// Deterministic offspring selection: pick top outcomes by probability
 // With stable tie-breaking (alphabetical genotype order)
-export function selectOffspring(outcomes: BreedingOutcome[]): { wingGenotype: WingGenotype; tailGenotype: TailGenotype } {
+// If fewer unique outcomes exist than requested, duplicates are used
+export function selectOffspring(
+  outcomes: BreedingOutcome[],
+  count: number = 2
+): { wingGenotype: WingGenotype; tailGenotype: TailGenotype }[] {
   // outcomes are already sorted by probability desc, then alphabetically
-  const selected = outcomes[0];
-  return {
-    wingGenotype: selected.wingGenotype,
-    tailGenotype: selected.tailGenotype,
-  };
+  const result: { wingGenotype: WingGenotype; tailGenotype: TailGenotype }[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const outcome = outcomes[i % outcomes.length];
+    result.push({
+      wingGenotype: outcome.wingGenotype,
+      tailGenotype: outcome.tailGenotype,
+    });
+  }
+
+  return result;
 }
 
 // Generate image filename for a pigeon

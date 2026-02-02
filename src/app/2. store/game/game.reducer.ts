@@ -13,26 +13,35 @@ import {
   GOAL_TAIL_GENOTYPE,
 } from '../../3. shared/genetics';
 
-function generateOffspringId(pigeons: Pigeon[]): string {
+function generateOffspringIds(pigeons: Pigeon[], count: number): string[] {
   const existingIds = new Set(pigeons.map((p) => p.id));
+  const ids: string[] = [];
   let counter = 1;
-  while (existingIds.has(`offspring-${counter}`)) {
+
+  while (ids.length < count) {
+    const id = `offspring-${counter}`;
+    if (!existingIds.has(id)) {
+      ids.push(id);
+      existingIds.add(id);
+    }
     counter++;
   }
-  return `offspring-${counter}`;
+
+  return ids;
 }
 
 function performBreeding(parent1: Pigeon, parent2: Pigeon, pigeons: Pigeon[]): BreedingResult {
   const wingSquare = generatePunnettSquare(parent1.wingGenotype, parent2.wingGenotype);
   const tailSquare = generatePunnettSquare(parent1.tailGenotype, parent2.tailGenotype);
   const outcomes = calculateBreedingOutcomes(parent1, parent2);
-  const selectedGenotype = selectOffspring(outcomes);
+  const selectedGenotypes = selectOffspring(outcomes, 2);
+  const ids = generateOffspringIds(pigeons, selectedGenotypes.length);
 
-  const offspring: Pigeon = {
-    id: generateOffspringId(pigeons),
-    wingGenotype: selectedGenotype.wingGenotype,
-    tailGenotype: selectedGenotype.tailGenotype,
-  };
+  const offspring: Pigeon[] = selectedGenotypes.map((genotype, index) => ({
+    id: ids[index],
+    wingGenotype: genotype.wingGenotype,
+    tailGenotype: genotype.tailGenotype,
+  }));
 
   return { wingSquare, tailSquare, outcomes, offspring };
 }
@@ -107,11 +116,12 @@ export const gameReducer = createReducer(
     }
 
     const offspring = state.lastBreedingResult.offspring;
-    const newPigeons = [...state.pigeons, offspring];
+    const newPigeons = [...state.pigeons, ...offspring];
     const newStepsRemaining = state.stepsRemaining - 1;
 
-    // Check win condition
-    if (isGoalPigeon(offspring, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE)) {
+    // Check win condition - any offspring matching the goal wins
+    const winningOffspring = offspring.find((o) => isGoalPigeon(o, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE));
+    if (winningOffspring) {
       return {
         ...state,
         phase: 'win',

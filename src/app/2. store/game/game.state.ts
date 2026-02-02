@@ -6,7 +6,7 @@ export interface BreedingResult {
   wingSquare: PunnettSquare;
   tailSquare: PunnettSquare;
   outcomes: BreedingOutcome[];
-  offspring: Pigeon;
+  offspring: Pigeon[];
 }
 
 export interface GameState {
