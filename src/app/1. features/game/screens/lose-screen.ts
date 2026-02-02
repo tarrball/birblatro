@@ -1,4 +1,5 @@
-import { Component, output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
+import { WingGenotype, TailGenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-lose-screen',
@@ -14,10 +15,10 @@ import { Component, output } from '@angular/core';
         <h3>Tip for Next Time</h3>
         <p>
           Think about which parent combinations give you the best chance
-          of getting closer to the goal genotype <strong>WW TT</strong>.
+          of getting closer to the goal genotype <strong>{{ goalWingGenotype() }} {{ goalTailGenotype() }}</strong>.
         </p>
         <p class="hint">
-          Remember: WW × WW always produces WW offspring for that trait!
+          Remember: Homozygous parents (like WW × WW) always produce that same genotype in offspring!
         </p>
       </div>
 
@@ -91,5 +92,8 @@ import { Component, output } from '@angular/core';
   `,
 })
 export class LoseScreenComponent {
+  goalWingGenotype = input.required<WingGenotype>();
+  goalTailGenotype = input.required<TailGenotype>();
+
   tryAgain = output();
 }

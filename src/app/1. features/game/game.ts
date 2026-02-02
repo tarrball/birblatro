@@ -67,10 +67,21 @@ import { LoseScreenComponent } from './screens/lose-screen';
         }
       }
       @case ('win') {
-        <app-win-screen [winningPigeon]="winningOffspring()" (playAgain)="onReset()" />
+        <app-win-screen
+          [winningPigeon]="winningOffspring()"
+          [goalWingGenotype]="goalGenotype().wingGenotype"
+          [goalTailGenotype]="goalGenotype().tailGenotype"
+          [goalWingPhenotype]="goalPhenotype().wingPhenotype"
+          [goalTailPhenotype]="goalPhenotype().tailPhenotype"
+          (playAgain)="onReset()"
+        />
       }
       @case ('lose') {
-        <app-lose-screen (tryAgain)="onReset()" />
+        <app-lose-screen
+          [goalWingGenotype]="goalGenotype().wingGenotype"
+          [goalTailGenotype]="goalGenotype().tailGenotype"
+          (tryAgain)="onReset()"
+        />
       }
     }
   `,

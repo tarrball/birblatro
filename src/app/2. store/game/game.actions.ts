@@ -1,7 +1,17 @@
 import { createAction, props } from '@ngrx/store';
 import { BreedingResult } from './game.state';
+import { Pigeon, WingGenotype, TailGenotype } from '../../3. shared/genetics';
 
 export const startGame = createAction('[Game] Start Game');
+
+export const gameInitialized = createAction(
+  '[Game] Game Initialized',
+  props<{
+    pigeons: Pigeon[];
+    goalWingGenotype: WingGenotype;
+    goalTailGenotype: TailGenotype;
+  }>()
+);
 
 export const selectParent1 = createAction('[Game] Select Parent 1', props<{ pigeonId: string }>());
 

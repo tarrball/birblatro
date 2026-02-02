@@ -231,3 +231,48 @@ export function getStartingPigeons(): Pigeon[] {
 export const GOAL_WING_GENOTYPE: WingGenotype = 'WW';
 export const GOAL_TAIL_GENOTYPE: TailGenotype = 'TT';
 export const MAX_BREEDING_STEPS = 10;
+
+// All possible genotypes
+const WING_GENOTYPES: WingGenotype[] = ['WW', 'Ww', 'ww'];
+const TAIL_GENOTYPES: TailGenotype[] = ['TT', 'Tt', 'tt'];
+
+/**
+ * Generates a random goal genotype combination.
+ * @param randomFn Optional random function (0-1). Defaults to Math.random.
+ * @returns Object with random wing and tail genotypes
+ */
+export function getRandomGoal(randomFn: () => number = Math.random): {
+  wingGenotype: WingGenotype;
+  tailGenotype: TailGenotype;
+} {
+  const wingGenotype = WING_GENOTYPES[Math.floor(randomFn() * WING_GENOTYPES.length)];
+  const tailGenotype = TAIL_GENOTYPES[Math.floor(randomFn() * TAIL_GENOTYPES.length)];
+  return { wingGenotype, tailGenotype };
+}
+
+/**
+ * Generates random starting pigeons, excluding the goal genotype.
+ * @param goalWing The goal wing genotype to exclude
+ * @param goalTail The goal tail genotype to exclude
+ * @param randomFn Optional random function (0-1). Defaults to Math.random.
+ * @returns Array of 4 random pigeons that don't match the goal
+ */
+export function getRandomStartingPigeons(
+  goalWing: WingGenotype,
+  goalTail: TailGenotype,
+  randomFn: () => number = Math.random
+): Pigeon[] {
+  const ids = ['A', 'B', 'C', 'D'];
+  return ids.map((id) => {
+    let wingGenotype: WingGenotype;
+    let tailGenotype: TailGenotype;
+
+    // Keep generating until we get a non-goal combination
+    do {
+      wingGenotype = WING_GENOTYPES[Math.floor(randomFn() * WING_GENOTYPES.length)];
+      tailGenotype = TAIL_GENOTYPES[Math.floor(randomFn() * TAIL_GENOTYPES.length)];
+    } while (wingGenotype === goalWing && tailGenotype === goalTail);
+
+    return { id, wingGenotype, tailGenotype };
+  });
+}

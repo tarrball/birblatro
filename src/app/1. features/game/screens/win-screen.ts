@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { PigeonCardComponent } from '../components/pigeon-card';
-import { PigeonWithPhenotype } from '../../../3. shared/genetics';
+import { PigeonWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-win-screen',
@@ -21,8 +21,8 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
         <h3>You did it!</h3>
         <p>
           By understanding how alleles combine in Punnett squares,
-          you successfully bred a pigeon with <strong>Large wings (WW)</strong>
-          and a <strong>Fan tail (TT)</strong>.
+          you successfully bred a pigeon with <strong>{{ goalWingPhenotype() }} ({{ goalWingGenotype() }})</strong>
+          and a <strong>{{ goalTailPhenotype() }} ({{ goalTailGenotype() }})</strong>.
         </p>
       </div>
 
@@ -98,6 +98,10 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
 })
 export class WinScreenComponent {
   winningPigeon = input.required<PigeonWithPhenotype | null>();
+  goalWingGenotype = input.required<WingGenotype>();
+  goalTailGenotype = input.required<TailGenotype>();
+  goalWingPhenotype = input.required<WingPhenotype>();
+  goalTailPhenotype = input.required<TailPhenotype>();
 
   playAgain = output();
 }

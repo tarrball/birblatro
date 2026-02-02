@@ -36,10 +36,6 @@ export const selectOffspring = createSelector(selectLastBreedingResult, (result)
   result ? result.offspring.map(getPigeonWithPhenotype) : []
 );
 
-export const selectWinningOffspring = createSelector(selectOffspring, (offspring) =>
-  offspring.find((o) => o.wingGenotype === 'WW' && o.tailGenotype === 'TT') ?? null
-);
-
 export const selectStepsRemaining = createSelector(selectGameState, (state) => state.stepsRemaining);
 
 export const selectGoalGenotype = createSelector(selectGameState, (state) => ({
@@ -51,6 +47,13 @@ export const selectGoalPhenotype = createSelector(selectGoalGenotype, (goal) => 
   wingPhenotype: getWingPhenotype(goal.wingGenotype),
   tailPhenotype: getTailPhenotype(goal.tailGenotype),
 }));
+
+export const selectWinningOffspring = createSelector(
+  selectOffspring,
+  selectGoalGenotype,
+  (offspring, goal) =>
+    offspring.find((o) => o.wingGenotype === goal.wingGenotype && o.tailGenotype === goal.tailGenotype) ?? null
+);
 
 export const selectCanBreed = createSelector(
   selectBothParentsSelected,

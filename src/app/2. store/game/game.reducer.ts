@@ -1,26 +1,25 @@
 import { createReducer, on } from '@ngrx/store';
 import { GameState, initialGameState } from './game.state';
 import * as GameActions from './game.actions';
-import {
-  getStartingPigeons,
-  isGoalPigeon,
-  MAX_BREEDING_STEPS,
-  GOAL_WING_GENOTYPE,
-  GOAL_TAIL_GENOTYPE,
-} from '../../3. shared/genetics';
+import { isGoalPigeon, MAX_BREEDING_STEPS } from '../../3. shared/genetics';
 
 export const gameReducer = createReducer(
   initialGameState,
 
-  on(GameActions.startGame, (state): GameState => {
+  // startGame is handled by effects, which dispatches gameInitialized
+  on(GameActions.startGame, (state): GameState => state),
+
+  on(GameActions.gameInitialized, (state, { pigeons, goalWingGenotype, goalTailGenotype }): GameState => {
     return {
       ...state,
       phase: 'deck',
-      pigeons: getStartingPigeons(),
+      pigeons,
       selectedParent1Id: null,
       selectedParent2Id: null,
       lastBreedingResult: null,
       stepsRemaining: MAX_BREEDING_STEPS,
+      goalWingGenotype,
+      goalTailGenotype,
     };
   }),
 
@@ -73,7 +72,7 @@ export const gameReducer = createReducer(
     const newStepsRemaining = state.stepsRemaining - 1;
 
     // Check win condition - any offspring matching the goal wins
-    const winningOffspring = offspring.find((o) => isGoalPigeon(o, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE));
+    const winningOffspring = offspring.find((o) => isGoalPigeon(o, state.goalWingGenotype, state.goalTailGenotype));
     if (winningOffspring) {
       return {
         ...state,

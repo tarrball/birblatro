@@ -10,6 +10,8 @@ import {
   generatePunnettSquare,
   calculateBreedingOutcomes,
   selectOffspring,
+  getRandomGoal,
+  getRandomStartingPigeons,
   Pigeon,
 } from '../../3. shared/genetics';
 import { RngService } from '../../3. shared/services';
@@ -36,6 +38,21 @@ export class GameEffects {
   private actions$ = inject(Actions);
   private store = inject(Store);
   private rng = inject(RngService);
+
+  startGame$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.startGame),
+      map(() => {
+        const goal = getRandomGoal(() => this.rng.random());
+        const pigeons = getRandomStartingPigeons(goal.wingGenotype, goal.tailGenotype, () => this.rng.random());
+        return GameActions.gameInitialized({
+          pigeons,
+          goalWingGenotype: goal.wingGenotype,
+          goalTailGenotype: goal.tailGenotype,
+        });
+      })
+    )
+  );
 
   confirmBreeding$ = createEffect(() =>
     this.actions$.pipe(

@@ -60,6 +60,14 @@ describe('Genetics Utilities', () => {
     it('handles homozygous recessive', () => {
       expect(normalizeGenotype('t', 't')).toBe('tt');
     });
+
+    it('sorts alphabetically when both same case (uppercase)', () => {
+      expect(normalizeGenotype('W', 'T')).toBe('TW');
+    });
+
+    it('sorts alphabetically when both same case (lowercase)', () => {
+      expect(normalizeGenotype('w', 't')).toBe('tw');
+    });
   });
 
   describe('generatePunnettSquare', () => {

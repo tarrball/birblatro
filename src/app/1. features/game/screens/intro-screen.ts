@@ -32,8 +32,8 @@ import { Component, output } from '@angular/core';
 
       <div class="goal-info">
         <h3>Your Goal</h3>
-        <p>Breed a pigeon with <strong>Large wings</strong> and a <strong>Fan tail</strong></p>
-        <p class="genotype-hint">Genotype: WW TT</p>
+        <p>Breed a pigeon that matches the <strong>target genotype</strong></p>
+        <p class="genotype-hint">A random goal will be assigned when you start!</p>
       </div>
 
       <button class="start-button" (click)="startGame.emit()">Start Game</button>
