@@ -74,10 +74,11 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
     }
 
     .pigeon-image {
-      width: 120px;
-      height: 120px;
+      width: 150px;
+      height: 150px;
       object-fit: contain;
-      margin-bottom: 12px;
+      margin: 0 auto 12px;
+      display: block;
     }
 
     .pigeon-info {
