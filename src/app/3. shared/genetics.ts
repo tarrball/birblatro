@@ -230,4 +230,4 @@ export function getStartingPigeons(): Pigeon[] {
 // Goal pigeon configuration
 export const GOAL_WING_GENOTYPE: WingGenotype = 'WW';
 export const GOAL_TAIL_GENOTYPE: TailGenotype = 'TT';
-export const MAX_BREEDING_STEPS = 3;
+export const MAX_BREEDING_STEPS = 10;
