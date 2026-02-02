@@ -184,9 +184,9 @@ export function selectOffspring(
 
 // Generate image filename for a pigeon
 export function getPigeonImagePath(pigeon: Pigeon): string {
-  const wingPhenotype = getWingPhenotype(pigeon.wingGenotype).toLowerCase().replace(' ', '-');
-  const tailPhenotype = getTailPhenotype(pigeon.tailGenotype).toLowerCase().replace(' ', '-');
-  return `pigeons/${pigeon.wingGenotype}-${pigeon.tailGenotype}-${wingPhenotype}-${tailPhenotype}.png`;
+  const wingAbbrev = pigeon.wingGenotype === 'WW' ? 'lw' : pigeon.wingGenotype === 'Ww' ? 'mw' : 'sw';
+  const tailAbbrev = pigeon.tailGenotype === 'TT' ? 'ft' : pigeon.tailGenotype === 'Tt' ? 'st' : 'pt';
+  return `pigeons/${wingAbbrev}${tailAbbrev}-${pigeon.wingGenotype}${pigeon.tailGenotype}.png`;
 }
 
 // Check if a pigeon matches the goal

@@ -181,14 +181,19 @@ describe('Genetics Utilities', () => {
   });
 
   describe('getPigeonImagePath', () => {
-    it('generates correct path for WW-TT pigeon', () => {
+    it('generates correct path for WW TT pigeon (large wings, fan tail)', () => {
       const pigeon: Pigeon = { id: '1', wingGenotype: 'WW', tailGenotype: 'TT' };
-      expect(getPigeonImagePath(pigeon)).toBe('pigeons/WW-TT-large-wings-fan-tail.png');
+      expect(getPigeonImagePath(pigeon)).toBe('pigeons/lwft-WWTT.png');
     });
 
-    it('generates correct path for ww-tt pigeon', () => {
+    it('generates correct path for ww tt pigeon (small wings, pointed tail)', () => {
       const pigeon: Pigeon = { id: '2', wingGenotype: 'ww', tailGenotype: 'tt' };
-      expect(getPigeonImagePath(pigeon)).toBe('pigeons/ww-tt-small-wings-pointed-tail.png');
+      expect(getPigeonImagePath(pigeon)).toBe('pigeons/swpt-wwtt.png');
+    });
+
+    it('generates correct path for Ww Tt pigeon (medium wings, standard tail)', () => {
+      const pigeon: Pigeon = { id: '3', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      expect(getPigeonImagePath(pigeon)).toBe('pigeons/mwst-WwTt.png');
     });
   });
 
