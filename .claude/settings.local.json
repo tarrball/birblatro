@@ -8,7 +8,9 @@
       "Bash(npm test:*)",
       "Bash(npx vitest run)",
       "Bash(npm run build:*)",
-      "Bash(timeout 15 npm start)"
+      "Bash(timeout 15 npm start)",
+      "Bash(curl:*)",
+      "Bash(timeout 30 npm start)"
     ]
   }
 }

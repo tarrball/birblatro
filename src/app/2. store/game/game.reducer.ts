@@ -1,52 +1,13 @@
 import { createReducer, on } from '@ngrx/store';
-import { GameState, initialGameState, BreedingResult } from './game.state';
+import { GameState, initialGameState } from './game.state';
 import * as GameActions from './game.actions';
 import {
   getStartingPigeons,
-  generatePunnettSquare,
-  calculateBreedingOutcomes,
-  selectOffspring,
   isGoalPigeon,
-  Pigeon,
   MAX_BREEDING_STEPS,
   GOAL_WING_GENOTYPE,
   GOAL_TAIL_GENOTYPE,
 } from '../../3. shared/genetics';
-
-function generateOffspringIds(pigeons: Pigeon[], count: number): string[] {
-  const existingIds = new Set(pigeons.map((p) => p.id));
-  const ids: string[] = [];
-  let counter = 1;
-
-  while (ids.length < count) {
-    const id = `offspring-${counter}`;
-    if (!existingIds.has(id)) {
-      ids.push(id);
-      existingIds.add(id);
-    }
-    counter++;
-  }
-
-  return ids;
-}
-
-function performBreeding(parent1: Pigeon, parent2: Pigeon, pigeons: Pigeon[]): BreedingResult {
-  const wingSquare = generatePunnettSquare(parent1.wingGenotype, parent2.wingGenotype);
-  const tailSquare = generatePunnettSquare(parent1.tailGenotype, parent2.tailGenotype);
-  const outcomes = calculateBreedingOutcomes(parent1, parent2);
-  const selectedGenotypes = selectOffspring(outcomes, 2);
-  const ids = generateOffspringIds(pigeons, selectedGenotypes.length);
-
-  const offspring: Pigeon[] = selectedGenotypes.map((genotype, index) => ({
-    id: ids[index],
-    wingGenotype: genotype.wingGenotype,
-    tailGenotype: genotype.tailGenotype,
-    parentId1: parent1.id,
-    parentId2: parent2.id,
-  }));
-
-  return { wingSquare, tailSquare, outcomes, offspring };
-}
 
 export const gameReducer = createReducer(
   initialGameState,
@@ -91,24 +52,14 @@ export const gameReducer = createReducer(
     };
   }),
 
-  on(GameActions.confirmBreeding, (state): GameState => {
-    if (!state.selectedParent1Id || !state.selectedParent2Id) {
-      return state;
-    }
+  // confirmBreeding is handled by effects, which dispatches breedingComplete
+  on(GameActions.confirmBreeding, (state): GameState => state),
 
-    const parent1 = state.pigeons.find((p) => p.id === state.selectedParent1Id);
-    const parent2 = state.pigeons.find((p) => p.id === state.selectedParent2Id);
-
-    if (!parent1 || !parent2) {
-      return state;
-    }
-
-    const breedingResult = performBreeding(parent1, parent2, state.pigeons);
-
+  on(GameActions.breedingComplete, (state, { result }): GameState => {
     return {
       ...state,
       phase: 'result',
-      lastBreedingResult: breedingResult,
+      lastBreedingResult: result,
     };
   }),
 

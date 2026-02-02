@@ -161,21 +161,44 @@ export function calculateBreedingOutcomes(parent1: Pigeon, parent2: Pigeon): Bre
   );
 }
 
-// Deterministic offspring selection: pick top outcomes by probability
-// With stable tie-breaking (alphabetical genotype order)
-// If fewer unique outcomes exist than requested, duplicates are used
+/**
+ * Selects offspring based on breeding outcome probabilities.
+ * @param outcomes Array of possible outcomes with probabilities
+ * @param count Number of offspring to select
+ * @param randomFn Optional random function (0-1). If not provided, uses deterministic selection.
+ * @returns Array of selected offspring genotypes
+ */
 export function selectOffspring(
   outcomes: BreedingOutcome[],
-  count: number = 2
+  count: number = 2,
+  randomFn?: () => number
 ): { wingGenotype: WingGenotype; tailGenotype: TailGenotype }[] {
-  // outcomes are already sorted by probability desc, then alphabetically
   const result: { wingGenotype: WingGenotype; tailGenotype: TailGenotype }[] = [];
 
   for (let i = 0; i < count; i++) {
-    const outcome = outcomes[i % outcomes.length];
+    let selectedOutcome: BreedingOutcome;
+
+    if (randomFn) {
+      // Probability-based random selection
+      const rand = randomFn();
+      let cumulative = 0;
+      selectedOutcome = outcomes[outcomes.length - 1]; // fallback
+
+      for (const outcome of outcomes) {
+        cumulative += outcome.probability;
+        if (rand < cumulative) {
+          selectedOutcome = outcome;
+          break;
+        }
+      }
+    } else {
+      // Deterministic: pick top outcomes in order (for backwards compatibility)
+      selectedOutcome = outcomes[i % outcomes.length];
+    }
+
     result.push({
-      wingGenotype: outcome.wingGenotype,
-      tailGenotype: outcome.tailGenotype,
+      wingGenotype: selectedOutcome.wingGenotype,
+      tailGenotype: selectedOutcome.tailGenotype,
     });
   }
 
