@@ -9,7 +9,11 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
       class="pigeon-card"
       [class.selected]="selected()"
       [class.selectable]="selectable()"
+      [class.highlight-offspring]="highlightAsOffspring()"
+      [class.highlight-parent]="highlightAsParent()"
       (click)="handleClick()"
+      (mouseenter)="handleMouseEnter()"
+      (mouseleave)="handleMouseLeave()"
     >
       <img
         [src]="imagePath()"
@@ -55,6 +59,20 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
 
+    .pigeon-card.highlight-offspring,
+    .pigeon-card.selectable.highlight-offspring:hover {
+      border-color: #8b5cf6;
+      background: #f5f3ff;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+    }
+
+    .pigeon-card.highlight-parent,
+    .pigeon-card.selectable.highlight-parent:hover {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+    }
+
     .pigeon-image {
       width: 120px;
       height: 120px;
@@ -94,8 +112,11 @@ export class PigeonCardComponent {
   pigeon = input.required<PigeonWithPhenotype>();
   selected = input<boolean>(false);
   selectable = input<boolean>(false);
+  highlightAsOffspring = input<boolean>(false);
+  highlightAsParent = input<boolean>(false);
 
   cardClick = output<string>();
+  cardHover = output<string | null>();
 
   imagePath() {
     return getPigeonImagePath(this.pigeon());
@@ -109,6 +130,14 @@ export class PigeonCardComponent {
     if (this.selectable()) {
       this.cardClick.emit(this.pigeon().id);
     }
+  }
+
+  handleMouseEnter() {
+    this.cardHover.emit(this.pigeon().id);
+  }
+
+  handleMouseLeave() {
+    this.cardHover.emit(null);
   }
 
   onImageError(event: Event) {

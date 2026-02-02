@@ -126,6 +126,20 @@ describe('Game Reducer', () => {
       expect(offspring[1].wingGenotype).toBe('Ww');
       expect(offspring[1].tailGenotype).toBe('Tt');
     });
+
+    it('sets parent IDs on offspring', () => {
+      let state = gameReducer(initialGameState, GameActions.startGame());
+      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.confirmBreeding());
+
+      const offspring = state.lastBreedingResult!.offspring;
+      expect(offspring).toHaveLength(2);
+      offspring.forEach((child) => {
+        expect(child.parentId1).toBe('A');
+        expect(child.parentId2).toBe('B');
+      });
+    });
   });
 
   describe('continueFromResult', () => {

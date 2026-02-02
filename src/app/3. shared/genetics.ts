@@ -18,6 +18,8 @@ export interface Pigeon {
   id: string;
   wingGenotype: WingGenotype;
   tailGenotype: TailGenotype;
+  parentId1?: string;
+  parentId2?: string;
 }
 
 export interface PigeonWithPhenotype extends Pigeon {

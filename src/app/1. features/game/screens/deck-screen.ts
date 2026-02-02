@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, signal, computed } from '@angular/core';
 import { PigeonCardComponent } from '../components/pigeon-card';
 import { PigeonWithPhenotype } from '../../../3. shared/genetics';
 
@@ -46,7 +46,10 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
             [pigeon]="pigeon"
             [selected]="isSelected(pigeon.id)"
             [selectable]="true"
+            [highlightAsOffspring]="highlightedOffspringId() === pigeon.id"
+            [highlightAsParent]="highlightedParentIds().has(pigeon.id)"
             (cardClick)="onPigeonClick($event)"
+            (cardHover)="onPigeonHover($event)"
           />
         }
       </div>
@@ -224,6 +227,34 @@ export class DeckScreenComponent {
   clearSelection = output();
   confirmBreeding = output();
 
+  hoveredPigeonId = signal<string | null>(null);
+
+  private hoveredPigeon = computed(() => {
+    const hoveredId = this.hoveredPigeonId();
+    if (!hoveredId) return null;
+    return this.pigeons().find(p => p.id === hoveredId) || null;
+  });
+
+  // Computed signal that returns the ID of the offspring being hovered (if it has parents)
+  highlightedOffspringId = computed(() => {
+    const hoveredId = this.hoveredPigeonId();
+    if (!hoveredId) return null;
+    const pigeon = this.pigeons().find(p => p.id === hoveredId);
+    if (pigeon?.parentId1 && pigeon?.parentId2) {
+      return hoveredId;
+    }
+    return null;
+  });
+
+  // Computed signal that returns the set of parent IDs to highlight
+  highlightedParentIds = computed(() => {
+    const hovered = this.hoveredPigeon();
+    if (!hovered || !hovered.parentId1 || !hovered.parentId2) {
+      return new Set<string>();
+    }
+    return new Set([hovered.parentId1, hovered.parentId2]);
+  });
+
   isSelected(pigeonId: string): boolean {
     return this.selectedParent1()?.id === pigeonId || this.selectedParent2()?.id === pigeonId;
   }
@@ -238,5 +269,9 @@ export class DeckScreenComponent {
     } else if (!this.selectedParent2()) {
       this.selectParent2.emit(pigeonId);
     }
+  }
+
+  onPigeonHover(pigeonId: string | null) {
+    this.hoveredPigeonId.set(pigeonId);
   }
 }

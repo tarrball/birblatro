@@ -41,6 +41,8 @@ function performBreeding(parent1: Pigeon, parent2: Pigeon, pigeons: Pigeon[]): B
     id: ids[index],
     wingGenotype: genotype.wingGenotype,
     tailGenotype: genotype.tailGenotype,
+    parentId1: parent1.id,
+    parentId2: parent2.id,
   }));
 
   return { wingSquare, tailSquare, outcomes, offspring };
