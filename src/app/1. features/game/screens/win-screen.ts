@@ -1,0 +1,103 @@
+import { Component, input, output } from '@angular/core';
+import { PigeonCardComponent } from '../components/pigeon-card';
+import { PigeonWithPhenotype } from '../../../3. shared/genetics';
+
+@Component({
+  selector: 'app-win-screen',
+  standalone: true,
+  imports: [PigeonCardComponent],
+  template: `
+    <div class="win-container">
+      <div class="celebration">
+        <h1>Congratulations!</h1>
+        <p class="win-message">You bred the goal pigeon!</p>
+      </div>
+
+      <div class="goal-pigeon">
+        <app-pigeon-card [pigeon]="winningPigeon()!" />
+      </div>
+
+      <div class="success-info">
+        <h3>You did it!</h3>
+        <p>
+          By understanding how alleles combine in Punnett squares,
+          you successfully bred a pigeon with <strong>Large wings (WW)</strong>
+          and a <strong>Fan tail (TT)</strong>.
+        </p>
+      </div>
+
+      <button class="play-again-button" (click)="playAgain.emit()">Play Again</button>
+    </div>
+  `,
+  styles: `
+    .win-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      padding: 48px 24px;
+      max-width: 600px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .celebration h1 {
+      font-size: 2.5rem;
+      color: #059669;
+      margin: 0;
+    }
+
+    .win-message {
+      font-size: 1.25rem;
+      color: #047857;
+      margin: 8px 0 0 0;
+    }
+
+    .goal-pigeon {
+      padding: 24px;
+      background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.2);
+    }
+
+    .success-info {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 400px;
+    }
+
+    .success-info h3 {
+      color: #166534;
+      margin: 0 0 12px 0;
+    }
+
+    .success-info p {
+      color: #15803d;
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .play-again-button {
+      background: #059669;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 16px 48px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .play-again-button:hover {
+      background: #047857;
+    }
+  `,
+})
+export class WinScreenComponent {
+  winningPigeon = input.required<PigeonWithPhenotype | null>();
+
+  playAgain = output();
+}

@@ -1,0 +1,198 @@
+/**
+ * Genetics utilities for Pigeon Punnett POC
+ * Uses incomplete dominance for both traits
+ */
+
+// Wing alleles: W (dominant) and w (recessive)
+// Tail alleles: T (dominant) and t (recessive)
+export type WingAllele = 'W' | 'w';
+export type TailAllele = 'T' | 't';
+
+export type WingGenotype = 'WW' | 'Ww' | 'ww';
+export type TailGenotype = 'TT' | 'Tt' | 'tt';
+
+export type WingPhenotype = 'Large wings' | 'Medium wings' | 'Small wings';
+export type TailPhenotype = 'Fan tail' | 'Standard tail' | 'Pointed tail';
+
+export interface Pigeon {
+  id: string;
+  wingGenotype: WingGenotype;
+  tailGenotype: TailGenotype;
+}
+
+export interface PigeonWithPhenotype extends Pigeon {
+  wingPhenotype: WingPhenotype;
+  tailPhenotype: TailPhenotype;
+}
+
+export interface PunnettSquare {
+  parent1Alleles: [string, string];
+  parent2Alleles: [string, string];
+  grid: [string, string, string, string]; // row-major: [0,0], [0,1], [1,0], [1,1]
+}
+
+export interface OutcomeProbability {
+  genotype: string;
+  probability: number;
+  count: number;
+}
+
+export interface BreedingOutcome {
+  wingGenotype: WingGenotype;
+  tailGenotype: TailGenotype;
+  probability: number;
+}
+
+// Genotype to Phenotype mappings (incomplete dominance)
+export function getWingPhenotype(genotype: WingGenotype): WingPhenotype {
+  switch (genotype) {
+    case 'WW':
+      return 'Large wings';
+    case 'Ww':
+      return 'Medium wings';
+    case 'ww':
+      return 'Small wings';
+  }
+}
+
+export function getTailPhenotype(genotype: TailGenotype): TailPhenotype {
+  switch (genotype) {
+    case 'TT':
+      return 'Fan tail';
+    case 'Tt':
+      return 'Standard tail';
+    case 'tt':
+      return 'Pointed tail';
+  }
+}
+
+export function getPigeonWithPhenotype(pigeon: Pigeon): PigeonWithPhenotype {
+  return {
+    ...pigeon,
+    wingPhenotype: getWingPhenotype(pigeon.wingGenotype),
+    tailPhenotype: getTailPhenotype(pigeon.tailGenotype),
+  };
+}
+
+// Normalize genotype to consistent format (uppercase allele first)
+export function normalizeGenotype<T extends string>(allele1: T, allele2: T): string {
+  const isFirstUppercase = allele1 === allele1.toUpperCase();
+  const isSecondUppercase = allele2 === allele2.toUpperCase();
+
+  if (isFirstUppercase && !isSecondUppercase) {
+    return `${allele1}${allele2}`;
+  }
+  if (!isFirstUppercase && isSecondUppercase) {
+    return `${allele2}${allele1}`;
+  }
+  // Both same case - sort alphabetically for consistency
+  return allele1 <= allele2 ? `${allele1}${allele2}` : `${allele2}${allele1}`;
+}
+
+// Get alleles from genotype
+export function getAlleles(genotype: string): [string, string] {
+  return [genotype[0], genotype[1]];
+}
+
+// Generate Punnett square for a single trait
+export function generatePunnettSquare(parent1Genotype: string, parent2Genotype: string): PunnettSquare {
+  const parent1Alleles = getAlleles(parent1Genotype);
+  const parent2Alleles = getAlleles(parent2Genotype);
+
+  const grid: [string, string, string, string] = [
+    normalizeGenotype(parent1Alleles[0], parent2Alleles[0]),
+    normalizeGenotype(parent1Alleles[0], parent2Alleles[1]),
+    normalizeGenotype(parent1Alleles[1], parent2Alleles[0]),
+    normalizeGenotype(parent1Alleles[1], parent2Alleles[1]),
+  ];
+
+  return {
+    parent1Alleles,
+    parent2Alleles,
+    grid,
+  };
+}
+
+// Calculate outcome probabilities from a Punnett square
+export function calculateProbabilities(punnettSquare: PunnettSquare): OutcomeProbability[] {
+  const counts = new Map<string, number>();
+
+  for (const genotype of punnettSquare.grid) {
+    counts.set(genotype, (counts.get(genotype) || 0) + 1);
+  }
+
+  return Array.from(counts.entries())
+    .map(([genotype, count]) => ({
+      genotype,
+      probability: count / 4,
+      count,
+    }))
+    .sort((a, b) => b.probability - a.probability || a.genotype.localeCompare(b.genotype));
+}
+
+// Calculate combined breeding outcomes (both traits)
+export function calculateBreedingOutcomes(parent1: Pigeon, parent2: Pigeon): BreedingOutcome[] {
+  const wingSquare = generatePunnettSquare(parent1.wingGenotype, parent2.wingGenotype);
+  const tailSquare = generatePunnettSquare(parent1.tailGenotype, parent2.tailGenotype);
+
+  const wingProbs = calculateProbabilities(wingSquare);
+  const tailProbs = calculateProbabilities(tailSquare);
+
+  const outcomes: BreedingOutcome[] = [];
+
+  for (const wingOutcome of wingProbs) {
+    for (const tailOutcome of tailProbs) {
+      outcomes.push({
+        wingGenotype: wingOutcome.genotype as WingGenotype,
+        tailGenotype: tailOutcome.genotype as TailGenotype,
+        probability: wingOutcome.probability * tailOutcome.probability,
+      });
+    }
+  }
+
+  // Sort by probability descending, then by genotype for deterministic ordering
+  return outcomes.sort(
+    (a, b) =>
+      b.probability - a.probability ||
+      a.wingGenotype.localeCompare(b.wingGenotype) ||
+      a.tailGenotype.localeCompare(b.tailGenotype)
+  );
+}
+
+// Deterministic offspring selection: pick highest probability outcome
+// With stable tie-breaking (alphabetical genotype order)
+export function selectOffspring(outcomes: BreedingOutcome[]): { wingGenotype: WingGenotype; tailGenotype: TailGenotype } {
+  // outcomes are already sorted by probability desc, then alphabetically
+  const selected = outcomes[0];
+  return {
+    wingGenotype: selected.wingGenotype,
+    tailGenotype: selected.tailGenotype,
+  };
+}
+
+// Generate image filename for a pigeon
+export function getPigeonImagePath(pigeon: Pigeon): string {
+  const wingPhenotype = getWingPhenotype(pigeon.wingGenotype).toLowerCase().replace(' ', '-');
+  const tailPhenotype = getTailPhenotype(pigeon.tailGenotype).toLowerCase().replace(' ', '-');
+  return `pigeons/${pigeon.wingGenotype}-${pigeon.tailGenotype}-${wingPhenotype}-${tailPhenotype}.png`;
+}
+
+// Check if a pigeon matches the goal
+export function isGoalPigeon(pigeon: Pigeon, goalWing: WingGenotype, goalTail: TailGenotype): boolean {
+  return pigeon.wingGenotype === goalWing && pigeon.tailGenotype === goalTail;
+}
+
+// Starting pigeons for the fixed run
+export function getStartingPigeons(): Pigeon[] {
+  return [
+    { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
+    { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
+    { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' },
+    { id: 'D', wingGenotype: 'Ww', tailGenotype: 'tt' },
+  ];
+}
+
+// Goal pigeon configuration
+export const GOAL_WING_GENOTYPE: WingGenotype = 'WW';
+export const GOAL_TAIL_GENOTYPE: TailGenotype = 'TT';
+export const MAX_BREEDING_STEPS = 3;
