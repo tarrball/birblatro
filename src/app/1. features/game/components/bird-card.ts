@@ -143,6 +143,6 @@ export class BirdCardComponent {
 
   onImageError(event: Event) {
     const img = event.target as HTMLImageElement;
-    img.src = 'pigeons/placeholder.svg';
+    img.src = 'birds/placeholder.svg';
   }
 }
