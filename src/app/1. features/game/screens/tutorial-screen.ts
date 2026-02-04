@@ -7,32 +7,184 @@ import { Component, output } from '@angular/core';
     <div class="tutorial-container">
       <h1 class="title">How to Play</h1>
 
-      <div class="instructions">
-        <h2>Game Steps</h2>
-        <ol>
-          <li>Select two parent birds from your collection</li>
-          <li>View the <strong>Punnett squares</strong> to predict offspring traits</li>
-          <li>Breed to create a new bird</li>
-          <li>Reach the goal bird to win!</li>
-        </ol>
+      <!-- Section 1: Introduction to Traits -->
+      <div class="section">
+        <h2>What Are Traits?</h2>
+        <p>
+          Living things have <strong>traits</strong> — characteristics that make them look or act a
+          certain way. In this game, our birds have traits like <strong>wing size</strong> and
+          <strong>tail shape</strong>.
+        </p>
+        <p>
+          Traits are passed down from parents to offspring through <strong>genes</strong>. Each gene
+          comes in different versions called <strong>alleles</strong>.
+        </p>
+      </div>
 
-        <div class="vocabulary">
-          <h3>Key Terms</h3>
-          <dl>
-            <dt>Allele</dt>
-            <dd>A version of a gene (like W or w for wing size)</dd>
-            <dt>Genotype</dt>
-            <dd>The combination of alleles (like Ww)</dd>
-            <dt>Phenotype</dt>
-            <dd>The visible trait (like "Medium wings")</dd>
-          </dl>
+      <!-- Section 2: Genotype vs Phenotype -->
+      <div class="section">
+        <h2>Genotype vs. Phenotype</h2>
+        <div class="vocab-grid">
+          <div class="vocab-card">
+            <h3>Genotype</h3>
+            <p>
+              The <em>genetic code</em> — the combination of alleles an organism has. Written with
+              letters like <span class="genotype">WW</span>, <span class="genotype">Ww</span>, or
+              <span class="genotype">ww</span>.
+            </p>
+          </div>
+          <div class="vocab-card">
+            <h3>Phenotype</h3>
+            <p>
+              The <em>visible trait</em> — what the organism actually looks like. For example:
+              "Large wings" or "Small wings."
+            </p>
+          </div>
+        </div>
+
+        <div class="key-concept">
+          <strong>Key Concept:</strong> Capital letters (W) are <strong>dominant</strong> — they
+          "show up" even when paired with a lowercase letter. Lowercase letters (w) are
+          <strong>recessive</strong> — they only show when there's no dominant allele present.
         </div>
       </div>
 
-      <div class="goal-info">
-        <h3>Your Goal</h3>
-        <p>Breed a bird that matches the <strong>target genotype</strong></p>
-        <p class="genotype-hint">A random goal will be assigned when you start!</p>
+      <!-- Section 3: Wing Size Examples -->
+      <div class="section">
+        <h2>Example: Wing Size</h2>
+        <p>
+          Let's look at the <strong>wing size</strong> trait. The dominant allele
+          <span class="genotype">W</span> gives larger wings, while the recessive allele
+          <span class="genotype">w</span> gives smaller wings.
+        </p>
+
+        <div class="bird-examples">
+          <div class="bird-example">
+            <img src="birds/lwst-WWTt.png" alt="Bird with large wings" class="bird-img" />
+            <div class="bird-label">Large Wings</div>
+            <div class="bird-genotype">WW</div>
+            <div class="bird-desc">Two dominant alleles</div>
+          </div>
+          <div class="bird-example">
+            <img src="birds/mwst-WwTt.png" alt="Bird with medium wings" class="bird-img" />
+            <div class="bird-label">Medium Wings</div>
+            <div class="bird-genotype">Ww</div>
+            <div class="bird-desc">One of each allele</div>
+          </div>
+          <div class="bird-example">
+            <img src="birds/swst-wwTt.png" alt="Bird with small wings" class="bird-img" />
+            <div class="bird-label">Small Wings</div>
+            <div class="bird-genotype">ww</div>
+            <div class="bird-desc">Two recessive alleles</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: One-Trait Punnett Square -->
+      <div class="section">
+        <h2>Predicting Offspring: The Punnett Square</h2>
+        <p>
+          A <strong>Punnett square</strong> helps us predict what traits offspring might have. Each
+          parent contributes one allele to their offspring.
+        </p>
+
+        <div class="punnett-example">
+          <h3>Example: Crossing Two Medium-Wing Birds (Ww × Ww)</h3>
+          <p class="punnett-setup">
+            Parent 1 has genotype <span class="genotype">Ww</span> and Parent 2 has genotype
+            <span class="genotype">Ww</span>. Let's see what offspring they might have:
+          </p>
+
+          <div class="punnett-demo">
+            <div class="punnett-grid">
+              <div class="cell corner"></div>
+              <div class="cell header">W</div>
+              <div class="cell header">w</div>
+              <div class="cell header">W</div>
+              <div class="cell outcome">WW</div>
+              <div class="cell outcome">Ww</div>
+              <div class="cell header">w</div>
+              <div class="cell outcome">Ww</div>
+              <div class="cell outcome">ww</div>
+            </div>
+
+            <div class="punnett-results">
+              <h4>Possible Outcomes:</h4>
+              <ul>
+                <li><span class="genotype">WW</span> = Large wings (25% chance)</li>
+                <li><span class="genotype">Ww</span> = Medium wings (50% chance)</li>
+                <li><span class="genotype">ww</span> = Small wings (25% chance)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Two-Trait Punnett Square -->
+      <div class="section">
+        <h2>Two Traits at Once</h2>
+        <p>
+          In this game, birds have <strong>two traits</strong>: wing size (W/w) and tail shape
+          (T/t). Each trait is inherited independently, so we use <strong>two Punnett squares</strong>
+          — one for each trait.
+        </p>
+
+        <div class="two-trait-example">
+          <h3>Example: Crossing Birds with Two Traits</h3>
+          <p class="punnett-setup">
+            Parent 1: <span class="genotype">Ww Tt</span> (Medium wings, Standard tail)<br />
+            Parent 2: <span class="genotype">Ww Tt</span> (Medium wings, Standard tail)
+          </p>
+
+          <div class="dual-punnett">
+            <div class="punnett-box">
+              <div class="punnett-title">Wing Size</div>
+              <div class="punnett-grid">
+                <div class="cell corner"></div>
+                <div class="cell header">W</div>
+                <div class="cell header">w</div>
+                <div class="cell header">W</div>
+                <div class="cell outcome">WW</div>
+                <div class="cell outcome">Ww</div>
+                <div class="cell header">w</div>
+                <div class="cell outcome">Ww</div>
+                <div class="cell outcome">ww</div>
+              </div>
+            </div>
+
+            <div class="punnett-box">
+              <div class="punnett-title">Tail Shape</div>
+              <div class="punnett-grid">
+                <div class="cell corner"></div>
+                <div class="cell header">T</div>
+                <div class="cell header">t</div>
+                <div class="cell header">T</div>
+                <div class="cell outcome">TT</div>
+                <div class="cell outcome">Tt</div>
+                <div class="cell header">t</div>
+                <div class="cell outcome">Tt</div>
+                <div class="cell outcome">tt</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="key-concept">
+            <strong>Remember:</strong> Each Punnett square gives you the odds for that one trait.
+            The offspring gets one result from each square!
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 6: Game Goal -->
+      <div class="section goal-section">
+        <h2>Your Goal</h2>
+        <p>
+          You'll be given a <strong>target bird</strong> with a specific genotype. Use what you've
+          learned about Punnett squares to breed birds until you create one that matches the goal!
+        </p>
+        <div class="goal-info">
+          <p>Select two parent birds → Predict the offspring → Breed → Repeat until you win!</p>
+        </div>
       </div>
 
       <div class="button-group">
@@ -46,11 +198,10 @@ import { Component, output } from '@angular/core';
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 24px;
+      gap: 32px;
       padding: 48px 24px;
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto;
-      text-align: center;
     }
 
     .title {
@@ -58,9 +209,11 @@ import { Component, output } from '@angular/core';
       font-weight: 700;
       color: #1f2937;
       margin: 0;
+      text-align: center;
     }
 
-    .instructions {
+    /* Section styling */
+    .section {
       background: #f9fafb;
       border-radius: 12px;
       padding: 24px;
@@ -68,76 +221,246 @@ import { Component, output } from '@angular/core';
       text-align: left;
     }
 
-    .instructions h2 {
+    .section h2 {
       font-size: 1.25rem;
-      color: #374151;
+      color: #1f2937;
       margin: 0 0 16px 0;
+      font-weight: 600;
     }
 
-    .instructions ol {
-      margin: 0;
-      padding-left: 24px;
-      color: #4b5563;
-    }
-
-    .instructions li {
-      margin-bottom: 8px;
-    }
-
-    .vocabulary {
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .vocabulary h3 {
+    .section h3 {
       font-size: 1rem;
       color: #374151;
       margin: 0 0 12px 0;
-    }
-
-    .vocabulary dl {
-      margin: 0;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 8px 16px;
-    }
-
-    .vocabulary dt {
       font-weight: 600;
+    }
+
+    .section p {
+      color: #4b5563;
+      margin: 0 0 12px 0;
+      line-height: 1.6;
+    }
+
+    .section p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Vocabulary cards */
+    .vocab-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .vocab-card {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .vocab-card h3 {
+      color: #1e40af;
+      margin-bottom: 8px;
+    }
+
+    .vocab-card p {
+      font-size: 0.875rem;
+      margin: 0;
+    }
+
+    /* Key concept callout */
+    .key-concept {
+      background: #fef3c7;
+      border: 1px solid #f59e0b;
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: #92400e;
+      font-size: 0.875rem;
+      line-height: 1.5;
+    }
+
+    /* Genotype styling */
+    .genotype {
+      font-family: monospace;
+      font-weight: 600;
+      background: #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 4px;
       color: #1f2937;
     }
 
-    .vocabulary dd {
-      margin: 0;
+    /* Bird examples grid */
+    .bird-examples {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .bird-example {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .bird-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 8px;
+    }
+
+    .bird-label {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 4px;
+    }
+
+    .bird-genotype {
+      font-family: monospace;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 4px 12px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    .bird-desc {
+      font-size: 0.75rem;
       color: #6b7280;
     }
 
-    .goal-info {
+    /* Punnett square examples */
+    .punnett-example,
+    .two-trait-example {
+      margin-top: 16px;
+    }
+
+    .punnett-setup {
+      margin-bottom: 16px;
+    }
+
+    .punnett-demo {
+      display: flex;
+      align-items: flex-start;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dual-punnett {
+      display: flex;
+      gap: 32px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .punnett-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .punnett-title {
+      font-weight: 600;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+
+    .punnett-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 48px);
+      grid-template-rows: repeat(3, 48px);
+      gap: 2px;
+    }
+
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+
+    .corner {
+      background: transparent;
+    }
+
+    .header {
+      background: #e5e7eb;
+      font-weight: 700;
+      color: #374151;
+      border-radius: 4px;
+    }
+
+    .outcome {
+      background: #dbeafe;
+      color: #1e40af;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .punnett-results {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .punnett-results h4 {
+      margin: 0 0 8px 0;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
+    .punnett-results ul {
+      margin: 0;
+      padding-left: 20px;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+
+    .punnett-results li {
+      margin-bottom: 4px;
+    }
+
+    /* Goal section */
+    .goal-section {
       background: #dbeafe;
       border: 2px solid #3b82f6;
-      border-radius: 12px;
-      padding: 20px;
-      width: 100%;
     }
 
-    .goal-info h3 {
-      font-size: 1.125rem;
+    .goal-section h2 {
       color: #1e40af;
-      margin: 0 0 8px 0;
     }
 
-    .goal-info p {
+    .goal-section p {
       color: #1e40af;
-      margin: 4px 0;
     }
 
-    .genotype-hint {
-      font-family: monospace;
-      font-size: 0.875rem;
-      opacity: 0.8;
+    .goal-section .goal-info {
+      background: white;
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
     }
 
+    .goal-section .goal-info p {
+      color: #374151;
+      font-weight: 500;
+      margin: 0;
+    }
+
+    /* Buttons */
     .button-group {
       display: flex;
       gap: 12px;
@@ -175,6 +498,27 @@ import { Component, output } from '@angular/core';
 
     .start-button:hover {
       background: #2563eb;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 600px) {
+      .vocab-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bird-examples {
+        grid-template-columns: 1fr;
+      }
+
+      .punnett-demo {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .dual-punnett {
+        flex-direction: column;
+        align-items: center;
+      }
     }
   `,
 })
