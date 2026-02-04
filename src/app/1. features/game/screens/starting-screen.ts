@@ -4,9 +4,10 @@ import { Component } from '@angular/core';
   selector: 'app-starting-screen',
   standalone: true,
   template: `
-    <div class="starting-container">
-      <div class="spinner"></div>
+    <div class="starting-container" role="status" aria-live="polite" aria-busy="true">
+      <div class="spinner" aria-hidden="true"></div>
       <h2>Creating your game...</h2>
+      <span class="sr-only">Please wait while the game is being created.</span>
     </div>
   `,
   styles: `

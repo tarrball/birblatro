@@ -96,17 +96,30 @@ import { Component, output } from '@angular/core';
           </p>
 
           <div class="punnett-demo">
-            <div class="punnett-grid">
-              <div class="cell corner"></div>
-              <div class="cell header">W</div>
-              <div class="cell header">w</div>
-              <div class="cell header">W</div>
-              <div class="cell outcome">WW</div>
-              <div class="cell outcome">Ww</div>
-              <div class="cell header">w</div>
-              <div class="cell outcome">Ww</div>
-              <div class="cell outcome">ww</div>
-            </div>
+            <table class="punnett-table" aria-label="Punnett Square for wing size cross Ww times Ww">
+              <caption class="sr-only">
+                Shows 4 possible offspring genotypes: WW, Ww, Ww, and ww
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="corner"><span class="sr-only">Parent 1 / Parent 2</span></th>
+                  <th scope="col" class="header">W</th>
+                  <th scope="col" class="header">w</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row" class="header">W</th>
+                  <td class="outcome">WW</td>
+                  <td class="outcome">Ww</td>
+                </tr>
+                <tr>
+                  <th scope="row" class="header">w</th>
+                  <td class="outcome">Ww</td>
+                  <td class="outcome">ww</td>
+                </tr>
+              </tbody>
+            </table>
 
             <div class="punnett-results">
               <h4>Possible Outcomes:</h4>
@@ -137,35 +150,55 @@ import { Component, output } from '@angular/core';
           </p>
 
           <div class="dual-punnett">
-            <div class="punnett-box">
-              <div class="punnett-title">Wing Size</div>
-              <div class="punnett-grid">
-                <div class="cell corner"></div>
-                <div class="cell header">W</div>
-                <div class="cell header">w</div>
-                <div class="cell header">W</div>
-                <div class="cell outcome">WW</div>
-                <div class="cell outcome">Ww</div>
-                <div class="cell header">w</div>
-                <div class="cell outcome">Ww</div>
-                <div class="cell outcome">ww</div>
-              </div>
-            </div>
+            <figure class="punnett-box">
+              <figcaption class="punnett-title">Wing Size</figcaption>
+              <table class="punnett-table" aria-label="Wing Size Punnett Square">
+                <thead>
+                  <tr>
+                    <th scope="col" class="corner"><span class="sr-only">Parent 1 / Parent 2</span></th>
+                    <th scope="col" class="header">W</th>
+                    <th scope="col" class="header">w</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row" class="header">W</th>
+                    <td class="outcome">WW</td>
+                    <td class="outcome">Ww</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" class="header">w</th>
+                    <td class="outcome">Ww</td>
+                    <td class="outcome">ww</td>
+                  </tr>
+                </tbody>
+              </table>
+            </figure>
 
-            <div class="punnett-box">
-              <div class="punnett-title">Tail Shape</div>
-              <div class="punnett-grid">
-                <div class="cell corner"></div>
-                <div class="cell header">T</div>
-                <div class="cell header">t</div>
-                <div class="cell header">T</div>
-                <div class="cell outcome">TT</div>
-                <div class="cell outcome">Tt</div>
-                <div class="cell header">t</div>
-                <div class="cell outcome">Tt</div>
-                <div class="cell outcome">tt</div>
-              </div>
-            </div>
+            <figure class="punnett-box">
+              <figcaption class="punnett-title">Tail Shape</figcaption>
+              <table class="punnett-table" aria-label="Tail Shape Punnett Square">
+                <thead>
+                  <tr>
+                    <th scope="col" class="corner"><span class="sr-only">Parent 1 / Parent 2</span></th>
+                    <th scope="col" class="header">T</th>
+                    <th scope="col" class="header">t</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row" class="header">T</th>
+                    <td class="outcome">TT</td>
+                    <td class="outcome">Tt</td>
+                  </tr>
+                  <tr>
+                    <th scope="row" class="header">t</th>
+                    <td class="outcome">Tt</td>
+                    <td class="outcome">tt</td>
+                  </tr>
+                </tbody>
+              </table>
+            </figure>
           </div>
 
           <div class="key-concept">
@@ -368,6 +401,7 @@ import { Component, output } from '@angular/core';
       flex-direction: column;
       align-items: center;
       gap: 8px;
+      margin: 0;
     }
 
     .punnett-title {
@@ -376,17 +410,17 @@ import { Component, output } from '@angular/core';
       font-size: 0.875rem;
     }
 
-    .punnett-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 48px);
-      grid-template-rows: repeat(3, 48px);
-      gap: 2px;
+    .punnett-table {
+      border-collapse: separate;
+      border-spacing: 2px;
     }
 
-    .cell {
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .punnett-table th,
+    .punnett-table td {
+      width: 48px;
+      height: 48px;
+      text-align: center;
+      vertical-align: middle;
       font-family: monospace;
       font-size: 1rem;
     }
@@ -407,6 +441,18 @@ import { Component, output } from '@angular/core';
       color: #1e40af;
       border-radius: 4px;
       font-weight: 500;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .punnett-results {

@@ -11,25 +11,33 @@ import { BirdWithPhenotype, getBirdImagePath, TraitConfig } from '../../../3. sh
       [class.selectable]="selectable()"
       [class.highlight-offspring]="highlightAsOffspring()"
       [class.highlight-parent]="highlightAsParent()"
+      [attr.role]="selectable() ? 'button' : null"
+      [attr.tabindex]="selectable() ? 0 : null"
+      [attr.aria-pressed]="selectable() ? selected() : null"
+      [attr.aria-label]="ariaLabel()"
       (click)="handleClick()"
+      (keydown)="handleKeyDown($event)"
       (mouseenter)="handleMouseEnter()"
       (mouseleave)="handleMouseLeave()"
+      (focus)="handleFocus()"
+      (blur)="handleBlur()"
     >
       <img
         [src]="imagePath()"
         [alt]="altText()"
         class="bird-image"
+        aria-hidden="true"
         (error)="onImageError($event)"
       />
       <div class="bird-info">
-        <div class="phenotype" title="Phenotype: The observable physical traits">
+        <div class="phenotype">
           @for (traitConfig of traitConfigs(); track traitConfig.id) {
             <span>{{ bird().phenotypes[traitConfig.id] }}</span>
           }
         </div>
-        <div class="genotype" title="Genotype: The genetic makeup (allele pairs)">
+        <div class="genotype">
           <span class="genotype-label">Genotype:</span>
-          <span class="genotype-value" title="Each letter represents an allele. Uppercase = dominant, lowercase = recessive">{{ genotypeDisplay() }}</span>
+          <span class="genotype-value">{{ genotypeDisplay() }}</span>
         </div>
       </div>
     </div>
@@ -136,8 +144,27 @@ export class BirdCardComponent {
     return `${phenotypes} bird`;
   });
 
+  ariaLabel = computed(() => {
+    const phenotypes = this.traitConfigs()
+      .map((config) => this.bird().phenotypes[config.id])
+      .join(', ');
+    const genotypes = this.traitConfigs()
+      .map((config) => this.bird().genotypes[config.id])
+      .join(' ');
+    const selectedState = this.selected() ? 'Selected. ' : '';
+    const action = this.selectable() ? 'Press to select as parent.' : '';
+    return `${selectedState}Bird with ${phenotypes}. Genotype: ${genotypes}. ${action}`;
+  });
+
   handleClick() {
     if (this.selectable()) {
+      this.cardClick.emit(this.bird().id);
+    }
+  }
+
+  handleKeyDown(event: KeyboardEvent) {
+    if (this.selectable() && (event.key === 'Enter' || event.key === ' ')) {
+      event.preventDefault();
       this.cardClick.emit(this.bird().id);
     }
   }
@@ -147,6 +174,14 @@ export class BirdCardComponent {
   }
 
   handleMouseLeave() {
+    this.cardHover.emit(null);
+  }
+
+  handleFocus() {
+    this.cardHover.emit(this.bird().id);
+  }
+
+  handleBlur() {
     this.cardHover.emit(null);
   }
 

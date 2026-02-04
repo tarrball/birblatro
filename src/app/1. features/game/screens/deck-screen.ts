@@ -14,25 +14,31 @@ import {
   standalone: true,
   imports: [BirdCardComponent],
   template: `
-    <div class="deck-container">
+    <main class="deck-container" aria-label="Bird breeding deck">
       <div class="header">
-        <h2>Your Birds</h2>
-        <div class="breed-count">
+        <h1>Your Birds</h1>
+        <div class="breed-count" aria-live="polite">
           Breeds: <strong>{{ breedCount() }}</strong>
         </div>
       </div>
 
-      <div class="goal-reminder">
-        <img [src]="goalImagePath()" alt="Goal bird" class="goal-image" />
+      <section class="goal-reminder" aria-label="Goal">
+        <img [src]="goalImagePath()" [alt]="'Goal bird: ' + goalPhenotypesDisplay()" class="goal-image" />
         <div class="goal-text">
           <span class="goal-label">Goal:</span>
           <strong>{{ goalPhenotypesDisplay() }}</strong>
-          <span class="genotype">({{ goalGenotypesDisplay() }})</span>
+          <span class="genotype" aria-label="Genotype {{ goalGenotypesDisplay() }}">({{ goalGenotypesDisplay() }})</span>
         </div>
-      </div>
+      </section>
 
-      <div class="selection-info">
-        <div class="parent-slot" [class.filled]="selectedParent1()">
+      <section class="selection-info" aria-label="Parent selection">
+        <div
+          class="parent-slot"
+          [class.filled]="selectedParent1()"
+          role="status"
+          aria-live="polite"
+          aria-label="Parent 1 selection"
+        >
           <span class="slot-label">Parent 1:</span>
           @if (selectedParent1(); as p1) {
             <span class="slot-value">{{ getParentPhenotypes(p1) }}</span>
@@ -40,8 +46,14 @@ import {
             <span class="slot-empty">Select a bird</span>
           }
         </div>
-        <span class="plus">+</span>
-        <div class="parent-slot" [class.filled]="selectedParent2()">
+        <span class="plus" aria-hidden="true">+</span>
+        <div
+          class="parent-slot"
+          [class.filled]="selectedParent2()"
+          role="status"
+          aria-live="polite"
+          aria-label="Parent 2 selection"
+        >
           <span class="slot-label">Parent 2:</span>
           @if (selectedParent2(); as p2) {
             <span class="slot-value">{{ getParentPhenotypes(p2) }}</span>
@@ -49,36 +61,48 @@ import {
             <span class="slot-empty">Select a bird</span>
           }
         </div>
-      </div>
+      </section>
 
-      <div class="birds-grid">
-        @for (bird of birds(); track bird.id) {
-          <app-bird-card
-            [bird]="bird"
-            [traitConfigs]="traitConfigs()"
-            [selected]="isSelected(bird.id)"
-            [selectable]="true"
-            [highlightAsOffspring]="highlightedOffspringId() === bird.id"
-            [highlightAsParent]="highlightedParentIds().has(bird.id)"
-            (cardClick)="onBirdClick($event)"
-            (cardHover)="onBirdHover($event)"
-          />
-        }
-      </div>
+      <section aria-label="Available birds">
+        <h2 class="sr-only">Available birds to select</h2>
+        <div class="birds-grid" role="list">
+          @for (bird of birds(); track bird.id) {
+            <div role="listitem">
+              <app-bird-card
+                [bird]="bird"
+                [traitConfigs]="traitConfigs()"
+                [selected]="isSelected(bird.id)"
+                [selectable]="true"
+                [highlightAsOffspring]="highlightedOffspringId() === bird.id"
+                [highlightAsParent]="highlightedParentIds().has(bird.id)"
+                (cardClick)="onBirdClick($event)"
+                (cardHover)="onBirdHover($event)"
+              />
+            </div>
+          }
+        </div>
+      </section>
 
-      <div class="actions">
+      <div class="actions" role="group" aria-label="Breeding actions">
         @if (selectedParent1() || selectedParent2()) {
-          <button class="clear-button" (click)="clearSelection.emit()">Clear Selection</button>
+          <button
+            class="clear-button"
+            (click)="clearSelection.emit()"
+            aria-label="Clear parent selection"
+          >
+            Clear Selection
+          </button>
         }
         <button
           class="breed-button"
           [disabled]="!canBreed()"
+          [attr.aria-label]="canBreed() ? 'Breed selected parents to create offspring' : 'Select two parent birds to breed'"
           (click)="confirmBreeding.emit()"
         >
           Breed
         </button>
       </div>
-    </div>
+    </main>
   `,
   styles: `
     .deck-container {
@@ -96,10 +120,22 @@ import {
       align-items: center;
     }
 
-    .header h2 {
+    .header h1 {
       font-size: 1.5rem;
       color: #1f2937;
       margin: 0;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     .breed-count {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, effect, ElementRef, AfterViewInit } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -47,61 +47,67 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
     LoseScreenComponent,
   ],
   template: `
-    @switch (phase()) {
-      @case ('intro') {
-        <app-intro-screen (startGame)="onStartGame()" (showTutorial)="onShowTutorial()" />
-      }
-      @case ('tutorial') {
-        <app-tutorial-screen (startGame)="onStartGame()" (backToIntro)="onBackToIntro()" />
-      }
-      @case ('starting') {
-        <app-starting-screen />
-      }
-      @case ('deck') {
-        <app-deck-screen
-          [birds]="birds()"
-          [selectedParent1]="selectedParent1()"
-          [selectedParent2]="selectedParent2()"
-          [breedCount]="breedCount()"
-          [goalGenotypes]="goalGenotypes()"
-          [goalPhenotypes]="goalPhenotypes()"
-          [traitConfigs]="traitConfigs()"
-          [canBreed]="canBreed()"
-          (selectParent1)="onSelectParent1($event)"
-          (selectParent2)="onSelectParent2($event)"
-          (clearSelection)="onClearSelection()"
-          (confirmBreeding)="onConfirmBreeding()"
-        />
-      }
-      @case ('result') {
-        @if (breedingResult(); as result) {
-          <app-result-screen
-            [breedingResult]="result"
-            [parent1]="selectedParent1()"
-            [parent2]="selectedParent2()"
-            [offspring]="offspring()"
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div id="main-content" #mainContent tabindex="-1">
+      @switch (phase()) {
+        @case ('intro') {
+          <app-intro-screen (startGame)="onStartGame()" (showTutorial)="onShowTutorial()" />
+        }
+        @case ('tutorial') {
+          <app-tutorial-screen (startGame)="onStartGame()" (backToIntro)="onBackToIntro()" />
+        }
+        @case ('starting') {
+          <app-starting-screen />
+        }
+        @case ('deck') {
+          <app-deck-screen
+            [birds]="birds()"
+            [selectedParent1]="selectedParent1()"
+            [selectedParent2]="selectedParent2()"
+            [breedCount]="breedCount()"
+            [goalGenotypes]="goalGenotypes()"
+            [goalPhenotypes]="goalPhenotypes()"
             [traitConfigs]="traitConfigs()"
-            (continueGame)="onContinue()"
+            [canBreed]="canBreed()"
+            (selectParent1)="onSelectParent1($event)"
+            (selectParent2)="onSelectParent2($event)"
+            (clearSelection)="onClearSelection()"
+            (confirmBreeding)="onConfirmBreeding()"
+          />
+        }
+        @case ('result') {
+          @if (breedingResult(); as result) {
+            <app-result-screen
+              [breedingResult]="result"
+              [parent1]="selectedParent1()"
+              [parent2]="selectedParent2()"
+              [offspring]="offspring()"
+              [traitConfigs]="traitConfigs()"
+              (continueGame)="onContinue()"
+            />
+          }
+        }
+        @case ('win') {
+          <app-win-screen
+            [winningBird]="winningOffspring()"
+            [goalGenotypes]="goalGenotypes()"
+            [goalPhenotypes]="goalPhenotypes()"
+            [traitConfigs]="traitConfigs()"
+            (playAgain)="onReset()"
+          />
+        }
+        @case ('lose') {
+          <app-lose-screen
+            [goalGenotypes]="goalGenotypes()"
+            [traitConfigs]="traitConfigs()"
+            (tryAgain)="onReset()"
           />
         }
       }
-      @case ('win') {
-        <app-win-screen
-          [winningBird]="winningOffspring()"
-          [goalGenotypes]="goalGenotypes()"
-          [goalPhenotypes]="goalPhenotypes()"
-          [traitConfigs]="traitConfigs()"
-          (playAgain)="onReset()"
-        />
-      }
-      @case ('lose') {
-        <app-lose-screen
-          [goalGenotypes]="goalGenotypes()"
-          [traitConfigs]="traitConfigs()"
-          (tryAgain)="onReset()"
-        />
-      }
-    }
+    </div>
+    <div aria-live="polite" aria-atomic="true" class="sr-only">
+      {{ screenAnnouncementText() }}
+    </div>
   `,
   styles: `
     :host {
@@ -109,10 +115,27 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
       min-height: 100vh;
       background: #f9fafb;
     }
+
+    #main-content:focus {
+      outline: none;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   `,
 })
 export class GameComponent {
   private store = inject(Store);
+  private elementRef = inject(ElementRef);
 
   phase = toSignal(this.store.select(selectPhase), { initialValue: 'intro' as const });
   birds = toSignal(this.store.select(selectBirdsWithPhenotype), { initialValue: [] });
@@ -132,6 +155,40 @@ export class GameComponent {
   breedingResult = toSignal(this.store.select(selectLastBreedingResult), { initialValue: null });
   offspring = toSignal(this.store.select(selectOffspring), { initialValue: [] });
   winningOffspring = toSignal(this.store.select(selectWinningOffspring), { initialValue: null });
+
+  private previousPhase: string | null = null;
+
+  // Screen announcements for screen readers
+  screenAnnouncementText = () => {
+    const phase = this.phase();
+    const announcements: Record<string, string> = {
+      intro: 'Welcome to Birblatro. Press Start Game to begin or How to Play to learn.',
+      tutorial: 'How to Play screen. Learn about genetics and Punnett squares.',
+      starting: 'Creating your game. Please wait.',
+      deck: 'Game started. Select two parent birds to breed.',
+      result: 'Breeding results. See your offspring.',
+      win: 'Congratulations! You won!',
+      lose: 'Game over. Try again.',
+    };
+    return announcements[phase] || '';
+  };
+
+  constructor() {
+    // Focus management on phase changes
+    effect(() => {
+      const currentPhase = this.phase();
+      if (this.previousPhase !== null && this.previousPhase !== currentPhase) {
+        // Delay to allow DOM to update
+        setTimeout(() => {
+          const mainContent = this.elementRef.nativeElement.querySelector('#main-content');
+          if (mainContent) {
+            mainContent.focus();
+          }
+        }, 100);
+      }
+      this.previousPhase = currentPhase;
+    });
+  }
 
   onStartGame() {
     this.store.dispatch(startGame());
