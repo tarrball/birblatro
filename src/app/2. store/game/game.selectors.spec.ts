@@ -69,6 +69,15 @@ describe('Game Selectors', () => {
       expect(result!.id).toBe('A');
       expect(result!.phenotypes['wing']).toBe('Large wings');
     });
+
+    it('returns null when selected bird ID does not exist', () => {
+      const state = createState({
+        birds: getStartingBirds(),
+        selectedParent1Id: 'nonexistent',
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
+      expect(selectSelectedParent1(state)).toBeNull();
+    });
   });
 
   describe('selectSelectedParent2', () => {
@@ -91,6 +100,15 @@ describe('Game Selectors', () => {
       expect(result).not.toBeNull();
       expect(result!.id).toBe('B');
       expect(result!.phenotypes['wing']).toBe('Small wings');
+    });
+
+    it('returns null when selected bird ID does not exist', () => {
+      const state = createState({
+        birds: getStartingBirds(),
+        selectedParent2Id: 'nonexistent',
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
+      expect(selectSelectedParent2(state)).toBeNull();
     });
   });
 
@@ -271,6 +289,16 @@ describe('Game Selectors', () => {
       const result = selectGoalPhenotypes(state);
       expect(result['wing']).toBe('Large wings');
       expect(result['tail']).toBe('Fan tail');
+    });
+
+    it('skips traits with missing genotypes', () => {
+      const state = createState({
+        goalGenotypes: { wing: 'WW' }, // missing tail
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
+      const result = selectGoalPhenotypes(state);
+      expect(result['wing']).toBe('Large wings');
+      expect(result['tail']).toBeUndefined();
     });
   });
 

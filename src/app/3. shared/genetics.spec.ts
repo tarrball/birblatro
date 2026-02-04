@@ -8,9 +8,14 @@ import {
   getBirdImagePath,
   isGoalBird,
   getStartingBirds,
+  getRandomGoal,
+  getRandomStartingBirds,
   Bird,
   createBird,
   getPhenotype,
+  getPhenotypeAbbreviation,
+  getTraitConfig,
+  computePhenotypes,
   WING_TRAIT,
   TAIL_TRAIT,
   STANDARD_TRAIT_SET,
@@ -48,6 +53,22 @@ describe('Genetics Utilities', () => {
       it('returns Pointed tail for tt', () => {
         expect(getPhenotype(TAIL_TRAIT, 'tt')).toBe('Pointed tail');
       });
+    });
+  });
+
+  describe('computePhenotypes', () => {
+    it('computes phenotypes for all traits', () => {
+      const bird: Bird = createBird('1', { wing: 'WW', tail: 'TT' });
+      const phenotypes = computePhenotypes(bird, standardTraitConfigs);
+      expect(phenotypes['wing']).toBe('Large wings');
+      expect(phenotypes['tail']).toBe('Fan tail');
+    });
+
+    it('skips traits with missing genotypes', () => {
+      const bird: Bird = createBird('1', { wing: 'WW' }); // missing tail
+      const phenotypes = computePhenotypes(bird, standardTraitConfigs);
+      expect(phenotypes['wing']).toBe('Large wings');
+      expect(phenotypes['tail']).toBeUndefined();
     });
   });
 
@@ -217,6 +238,16 @@ describe('Genetics Utilities', () => {
       const bird: Bird = createBird('1', { wing: 'WW' });
       expect(getBirdImagePath(bird, basicTraitConfigs)).toBe('birds/placeholder.svg');
     });
+
+    it('returns placeholder when wing genotype is missing', () => {
+      const bird: Bird = createBird('1', { tail: 'TT' });
+      expect(getBirdImagePath(bird, standardTraitConfigs)).toBe('birds/placeholder.svg');
+    });
+
+    it('returns placeholder when tail genotype is missing', () => {
+      const bird: Bird = createBird('1', { wing: 'WW' });
+      expect(getBirdImagePath(bird, standardTraitConfigs)).toBe('birds/placeholder.svg');
+    });
   });
 
   describe('isGoalBird', () => {
@@ -268,6 +299,108 @@ describe('Genetics Utilities', () => {
       expect(birds[0].genotypes['wing']).toBeDefined();
       expect(birds[0].genotypes['tail']).toBeDefined();
       expect(birds[0].genotypes['crest']).toBeDefined();
+    });
+  });
+
+  describe('getRandomGoal', () => {
+    it('generates a goal with genotypes for all traits in the set', () => {
+      const mockRandom = () => 0.5;
+      const goal = getRandomGoal('standard', mockRandom);
+
+      expect(goal['wing']).toBeDefined();
+      expect(goal['tail']).toBeDefined();
+      expect(['WW', 'Ww', 'ww']).toContain(goal['wing']);
+      expect(['TT', 'Tt', 'tt']).toContain(goal['tail']);
+    });
+
+    it('uses random function to select genotypes', () => {
+      // When random returns 0, should select first genotype (WW, TT)
+      const lowRandom = () => 0;
+      const lowGoal = getRandomGoal('standard', lowRandom);
+      expect(lowGoal['wing']).toBe('WW');
+      expect(lowGoal['tail']).toBe('TT');
+
+      // When random returns 0.99, should select last genotype (ww, tt)
+      const highRandom = () => 0.99;
+      const highGoal = getRandomGoal('standard', highRandom);
+      expect(highGoal['wing']).toBe('ww');
+      expect(highGoal['tail']).toBe('tt');
+    });
+
+    it('works with basic trait set', () => {
+      const goal = getRandomGoal('basic', () => 0);
+      expect(goal['wing']).toBe('WW');
+      expect(goal['tail']).toBeUndefined();
+    });
+  });
+
+  describe('getRandomStartingBirds', () => {
+    it('generates 4 birds that do not match the goal', () => {
+      const goal = { wing: 'WW', tail: 'TT' };
+      let callCount = 0;
+      const mockRandom = () => {
+        callCount++;
+        return (callCount % 3) * 0.4; // Cycle through 0, 0.4, 0.8
+      };
+
+      const birds = getRandomStartingBirds(goal, 'standard', mockRandom);
+
+      expect(birds).toHaveLength(4);
+      birds.forEach((bird) => {
+        // Each bird should not match the goal
+        const matchesGoal =
+          bird.genotypes['wing'] === goal['wing'] && bird.genotypes['tail'] === goal['tail'];
+        expect(matchesGoal).toBe(false);
+      });
+    });
+
+    it('assigns unique IDs A, B, C, D', () => {
+      const goal = { wing: 'WW', tail: 'TT' };
+      const birds = getRandomStartingBirds(goal, 'standard', () => 0.5);
+
+      expect(birds.map((b) => b.id)).toEqual(['A', 'B', 'C', 'D']);
+    });
+  });
+
+  describe('error handling', () => {
+    describe('getTraitConfigsForSet', () => {
+      it('throws error for unknown trait set', () => {
+        expect(() => getTraitConfigsForSet('nonexistent')).toThrow('Unknown trait set: nonexistent');
+      });
+    });
+
+    describe('getTraitConfig', () => {
+      it('throws error for unknown trait', () => {
+        expect(() => getTraitConfig('nonexistent')).toThrow('Unknown trait: nonexistent');
+      });
+
+      it('returns trait config for valid trait', () => {
+        const config = getTraitConfig('wing');
+        expect(config.id).toBe('wing');
+        expect(config.displayName).toBe('Wing Size');
+      });
+    });
+
+    describe('getPhenotype', () => {
+      it('throws error for unknown genotype', () => {
+        expect(() => getPhenotype(WING_TRAIT, 'XX')).toThrow(
+          "Unknown genotype 'XX' for trait 'wing'"
+        );
+      });
+    });
+
+    describe('getPhenotypeAbbreviation', () => {
+      it('throws error for unknown genotype', () => {
+        expect(() => getPhenotypeAbbreviation(WING_TRAIT, 'XX')).toThrow(
+          "Unknown genotype 'XX' for trait 'wing'"
+        );
+      });
+
+      it('returns abbreviation for valid genotype', () => {
+        expect(getPhenotypeAbbreviation(WING_TRAIT, 'WW')).toBe('lw');
+        expect(getPhenotypeAbbreviation(WING_TRAIT, 'Ww')).toBe('mw');
+        expect(getPhenotypeAbbreviation(WING_TRAIT, 'ww')).toBe('sw');
+      });
     });
   });
 });
