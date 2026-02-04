@@ -1,6 +1,6 @@
 import { Component, input, output, signal, computed } from '@angular/core';
 import { BirdCardComponent } from '../components/bird-card';
-import { BirdWithPhenotype } from '../../../3. shared/genetics';
+import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-deck-screen',
@@ -16,8 +16,12 @@ import { BirdWithPhenotype } from '../../../3. shared/genetics';
       </div>
 
       <div class="goal-reminder">
-        Goal: <strong>{{ goalWingPhenotype() }}</strong> + <strong>{{ goalTailPhenotype() }}</strong>
-        <span class="genotype">({{ goalWingGenotype() }} {{ goalTailGenotype() }})</span>
+        <img [src]="goalImagePath()" alt="Goal bird" class="goal-image" />
+        <div class="goal-text">
+          <span class="goal-label">Goal:</span>
+          <strong>{{ goalWingPhenotype() }}</strong> + <strong>{{ goalTailPhenotype() }}</strong>
+          <span class="genotype">({{ goalWingGenotype() }} {{ goalTailGenotype() }})</span>
+        </div>
       </div>
 
       <div class="selection-info">
@@ -96,12 +100,35 @@ import { BirdWithPhenotype } from '../../../3. shared/genetics';
     }
 
     .goal-reminder {
+      display: flex;
+      align-items: center;
+      gap: 16px;
       background: #fef3c7;
       border: 1px solid #f59e0b;
       border-radius: 8px;
       padding: 12px 16px;
       color: #92400e;
       font-size: 0.875rem;
+    }
+
+    .goal-image {
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: white;
+      padding: 4px;
+    }
+
+    .goal-text {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .goal-label {
+      margin-right: 4px;
     }
 
     .goal-reminder .genotype {
@@ -216,10 +243,18 @@ export class DeckScreenComponent {
   selectedParent1 = input<BirdWithPhenotype | null>(null);
   selectedParent2 = input<BirdWithPhenotype | null>(null);
   stepsRemaining = input.required<number>();
-  goalWingGenotype = input.required<string>();
-  goalTailGenotype = input.required<string>();
+  goalWingGenotype = input.required<WingGenotype>();
+  goalTailGenotype = input.required<TailGenotype>();
   goalWingPhenotype = input.required<string>();
   goalTailPhenotype = input.required<string>();
+
+  goalImagePath = computed(() => {
+    return getBirdImagePath({
+      id: 'goal',
+      wingGenotype: this.goalWingGenotype(),
+      tailGenotype: this.goalTailGenotype(),
+    });
+  });
   canBreed = input.required<boolean>();
 
   selectParent1 = output<string>();
