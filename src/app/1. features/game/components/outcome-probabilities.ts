@@ -1,6 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, input, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { BreedingOutcome, getWingPhenotype, getTailPhenotype } from '../../../3. shared/genetics';
+import { BreedingOutcome, TraitConfig, getPhenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-outcome-probabilities',
@@ -13,10 +13,10 @@ import { BreedingOutcome, getWingPhenotype, getTailPhenotype } from '../../../3.
         @for (outcome of sortedOutcomes(); track $index) {
           <div class="outcome-row" [class.highlight]="outcome.probability >= 0.25">
             <div class="outcome-genotype">
-              <span class="genotype">{{ outcome.wingGenotype }} {{ outcome.tailGenotype }}</span>
+              <span class="genotype">{{ getGenotypeDisplay(outcome) }}</span>
             </div>
             <div class="outcome-phenotype">
-              {{ getWingPhenotype(outcome.wingGenotype) }}, {{ getTailPhenotype(outcome.tailGenotype) }}
+              {{ getPhenotypeDisplay(outcome) }}
             </div>
             <div class="outcome-probability">
               {{ outcome.probability * 100 | number: '1.0-0' }}%
@@ -80,11 +80,21 @@ import { BreedingOutcome, getWingPhenotype, getTailPhenotype } from '../../../3.
 })
 export class OutcomeProbabilitiesComponent {
   outcomes = input.required<BreedingOutcome[]>();
+  traitConfigs = input.required<TraitConfig[]>();
 
-  getWingPhenotype = getWingPhenotype;
-  getTailPhenotype = getTailPhenotype;
+  sortedOutcomes = computed(() =>
+    [...this.outcomes()].sort((a, b) => b.probability - a.probability).slice(0, 6)
+  );
 
-  sortedOutcomes() {
-    return [...this.outcomes()].sort((a, b) => b.probability - a.probability).slice(0, 6);
+  getGenotypeDisplay(outcome: BreedingOutcome): string {
+    return this.traitConfigs()
+      .map((config) => outcome.genotypes[config.id])
+      .join(' ');
+  }
+
+  getPhenotypeDisplay(outcome: BreedingOutcome): string {
+    return this.traitConfigs()
+      .map((config) => getPhenotype(config, outcome.genotypes[config.id]))
+      .join(', ');
   }
 }

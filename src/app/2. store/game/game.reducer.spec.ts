@@ -2,23 +2,23 @@ import { describe, it, expect } from 'vitest';
 import { gameReducer } from './game.reducer';
 import { initialGameState, GameState, BreedingResult } from './game.state';
 import * as GameActions from './game.actions';
-import { MAX_BREEDING_STEPS, Bird } from '../../3. shared/genetics';
+import { MAX_BREEDING_STEPS, Bird, createBird, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
 // Helper to create a started game state
 function createStartedState(overrides: Partial<GameState> = {}): GameState {
   const birds: Bird[] = [
-    { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
-    { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
-    { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-    { id: 'D', wingGenotype: 'Ww', tailGenotype: 'tt' },
+    createBird('A', { wing: 'WW', tail: 'tt' }),
+    createBird('B', { wing: 'ww', tail: 'TT' }),
+    createBird('C', { wing: 'Ww', tail: 'Tt' }),
+    createBird('D', { wing: 'Ww', tail: 'tt' }),
   ];
 
   return gameReducer(
     initialGameState,
     GameActions.gameInitialized({
       birds,
-      goalWingGenotype: 'WW',
-      goalTailGenotype: 'TT',
+      goalGenotypes: { wing: 'WW', tail: 'TT' },
+      activeTraitSetId: DEFAULT_TRAIT_SET_ID,
       ...overrides,
     })
   );
@@ -27,16 +27,20 @@ function createStartedState(overrides: Partial<GameState> = {}): GameState {
 // Helper to create a breeding result
 function createBreedingResult(offspring: Bird[]): BreedingResult {
   return {
-    wingSquare: {
-      parent1Alleles: ['W', 'w'] as [string, string],
-      parent2Alleles: ['w', 'w'] as [string, string],
-      grid: ['Ww', 'Ww', 'ww', 'ww'] as [string, string, string, string],
-    },
-    tailSquare: {
-      parent1Alleles: ['t', 't'] as [string, string],
-      parent2Alleles: ['T', 'T'] as [string, string],
-      grid: ['Tt', 'Tt', 'Tt', 'Tt'] as [string, string, string, string],
-    },
+    squares: [
+      {
+        traitId: 'wing',
+        parent1Alleles: ['W', 'w'] as [string, string],
+        parent2Alleles: ['w', 'w'] as [string, string],
+        grid: ['Ww', 'Ww', 'ww', 'ww'] as [string, string, string, string],
+      },
+      {
+        traitId: 'tail',
+        parent1Alleles: ['t', 't'] as [string, string],
+        parent2Alleles: ['T', 'T'] as [string, string],
+        grid: ['Tt', 'Tt', 'Tt', 'Tt'] as [string, string, string, string],
+      },
+    ],
     outcomes: [],
     offspring,
   };
@@ -72,8 +76,8 @@ describe('Game Reducer', () => {
 
     it('sets the goal genotypes', () => {
       const state = createStartedState();
-      expect(state.goalWingGenotype).toBe('WW');
-      expect(state.goalTailGenotype).toBe('TT');
+      expect(state.goalGenotypes['wing']).toBe('WW');
+      expect(state.goalGenotypes['tail']).toBe('TT');
     });
 
     it('sets steps remaining', () => {
@@ -91,8 +95,8 @@ describe('Game Reducer', () => {
         previousState,
         GameActions.gameInitialized({
           birds: [],
-          goalWingGenotype: 'WW',
-          goalTailGenotype: 'TT',
+          goalGenotypes: { wing: 'WW', tail: 'TT' },
+          activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         })
       );
       expect(state.selectedParent1Id).toBeNull();
@@ -156,8 +160,8 @@ describe('Game Reducer', () => {
     it('transitions to result phase', () => {
       let state = createStartedState();
       const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-        { id: 'offspring-2', wingGenotype: 'Ww', tailGenotype: 'Tt' },
+        createBird('offspring-1', { wing: 'Ww', tail: 'Tt' }),
+        createBird('offspring-2', { wing: 'Ww', tail: 'Tt' }),
       ]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
       expect(state.phase).toBe('result');
@@ -166,8 +170,8 @@ describe('Game Reducer', () => {
     it('stores the breeding result', () => {
       let state = createStartedState();
       const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt', parentId1: 'A', parentId2: 'B' },
-        { id: 'offspring-2', wingGenotype: 'Ww', tailGenotype: 'Tt', parentId1: 'A', parentId2: 'B' },
+        createBird('offspring-1', { wing: 'Ww', tail: 'Tt' }, 'A', 'B'),
+        createBird('offspring-2', { wing: 'Ww', tail: 'Tt' }, 'A', 'B'),
       ]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
       expect(state.lastBreedingResult).toEqual(result);
@@ -181,8 +185,8 @@ describe('Game Reducer', () => {
     it('adds all offspring to birds', () => {
       let state = createStartedState();
       const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt', parentId1: 'A', parentId2: 'B' },
-        { id: 'offspring-2', wingGenotype: 'Ww', tailGenotype: 'Tt', parentId1: 'A', parentId2: 'B' },
+        createBird('offspring-1', { wing: 'Ww', tail: 'Tt' }, 'A', 'B'),
+        createBird('offspring-2', { wing: 'Ww', tail: 'Tt' }, 'A', 'B'),
       ]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
 
@@ -197,9 +201,7 @@ describe('Game Reducer', () => {
       let state = createStartedState();
       const initialSteps = state.stepsRemaining;
 
-      const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-      ]);
+      const result = createBreedingResult([createBird('offspring-1', { wing: 'Ww', tail: 'Tt' })]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
       state = gameReducer(state, GameActions.continueFromResult());
 
@@ -208,19 +210,19 @@ describe('Game Reducer', () => {
 
     it('transitions to lose phase when steps exhausted without winning', () => {
       const birds: Bird[] = [
-        { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
-        { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
+        createBird('A', { wing: 'WW', tail: 'tt' }),
+        createBird('B', { wing: 'ww', tail: 'TT' }),
       ];
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
         birds,
         stepsRemaining: 1,
-        goalWingGenotype: 'WW',
-        goalTailGenotype: 'TT',
+        goalGenotypes: { wing: 'WW', tail: 'TT' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: createBreedingResult([
-          { id: 'test1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-          { id: 'test2', wingGenotype: 'Ww', tailGenotype: 'Tt' }, // Not winners
+          createBird('test1', { wing: 'Ww', tail: 'Tt' }),
+          createBird('test2', { wing: 'Ww', tail: 'Tt' }), // Not winners
         ]),
       };
 
@@ -231,19 +233,19 @@ describe('Game Reducer', () => {
 
     it('transitions to win phase when any offspring matches the goal', () => {
       const birds: Bird[] = [
-        { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
-        { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
+        createBird('A', { wing: 'WW', tail: 'tt' }),
+        createBird('B', { wing: 'ww', tail: 'TT' }),
       ];
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
         birds,
         stepsRemaining: 2,
-        goalWingGenotype: 'WW',
-        goalTailGenotype: 'TT',
+        goalGenotypes: { wing: 'WW', tail: 'TT' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: createBreedingResult([
-          { id: 'loser', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-          { id: 'winner', wingGenotype: 'WW', tailGenotype: 'TT' }, // Winner!
+          createBird('loser', { wing: 'Ww', tail: 'Tt' }),
+          createBird('winner', { wing: 'WW', tail: 'TT' }), // Winner!
         ]),
       };
 
@@ -252,19 +254,17 @@ describe('Game Reducer', () => {
     });
 
     it('uses dynamic goal from state for win condition', () => {
-      const birds: Bird[] = [
-        { id: 'A', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-      ];
+      const birds: Bird[] = [createBird('A', { wing: 'Ww', tail: 'Tt' })];
       // Goal is ww tt (different from default)
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
         birds,
         stepsRemaining: 2,
-        goalWingGenotype: 'ww',
-        goalTailGenotype: 'tt',
+        goalGenotypes: { wing: 'ww', tail: 'tt' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: createBreedingResult([
-          { id: 'winner', wingGenotype: 'ww', tailGenotype: 'tt' }, // Matches custom goal
+          createBird('winner', { wing: 'ww', tail: 'tt' }), // Matches custom goal
         ]),
       };
 
@@ -276,9 +276,7 @@ describe('Game Reducer', () => {
       let state = createStartedState();
       state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
       state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
-      const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-      ]);
+      const result = createBreedingResult([createBird('offspring-1', { wing: 'Ww', tail: 'Tt' })]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
       state = gameReducer(state, GameActions.continueFromResult());
 
@@ -298,13 +296,26 @@ describe('Game Reducer', () => {
       let state = createStartedState();
       state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
       state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
-      const result = createBreedingResult([
-        { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-      ]);
+      const result = createBreedingResult([createBird('offspring-1', { wing: 'Ww', tail: 'Tt' })]);
       state = gameReducer(state, GameActions.breedingComplete({ result }));
 
       state = gameReducer(state, GameActions.resetGame());
       expect(state).toEqual(initialGameState);
+    });
+  });
+
+  describe('showTutorial', () => {
+    it('transitions to tutorial phase', () => {
+      const state = gameReducer(initialGameState, GameActions.showTutorial());
+      expect(state.phase).toBe('tutorial');
+    });
+  });
+
+  describe('backToIntro', () => {
+    it('transitions to intro phase', () => {
+      const state = createStartedState();
+      const newState = gameReducer(state, GameActions.backToIntro());
+      expect(newState.phase).toBe('intro');
     });
   });
 });

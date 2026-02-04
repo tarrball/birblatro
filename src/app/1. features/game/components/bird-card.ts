@@ -1,5 +1,5 @@
-import { Component, input, output } from '@angular/core';
-import { BirdWithPhenotype, getBirdImagePath } from '../../../3. shared/genetics';
+import { Component, input, output, computed } from '@angular/core';
+import { BirdWithPhenotype, getBirdImagePath, TraitConfig } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-bird-card',
@@ -23,12 +23,13 @@ import { BirdWithPhenotype, getBirdImagePath } from '../../../3. shared/genetics
       />
       <div class="bird-info">
         <div class="phenotype" title="Phenotype: The observable physical traits">
-          <span>{{ bird().wingPhenotype }}</span>
-          <span>{{ bird().tailPhenotype }}</span>
+          @for (traitConfig of traitConfigs(); track traitConfig.id) {
+            <span>{{ bird().phenotypes[traitConfig.id] }}</span>
+          }
         </div>
         <div class="genotype" title="Genotype: The genetic makeup (allele pairs)">
           <span class="genotype-label">Genotype:</span>
-          <span class="genotype-value" title="Each letter represents an allele. Uppercase = dominant, lowercase = recessive">{{ bird().wingGenotype }} {{ bird().tailGenotype }}</span>
+          <span class="genotype-value" title="Each letter represents an allele. Uppercase = dominant, lowercase = recessive">{{ genotypeDisplay() }}</span>
         </div>
       </div>
     </div>
@@ -111,6 +112,7 @@ import { BirdWithPhenotype, getBirdImagePath } from '../../../3. shared/genetics
 })
 export class BirdCardComponent {
   bird = input.required<BirdWithPhenotype>();
+  traitConfigs = input.required<TraitConfig[]>();
   selected = input<boolean>(false);
   selectable = input<boolean>(false);
   highlightAsOffspring = input<boolean>(false);
@@ -119,13 +121,20 @@ export class BirdCardComponent {
   cardClick = output<string>();
   cardHover = output<string | null>();
 
-  imagePath() {
-    return getBirdImagePath(this.bird());
-  }
+  imagePath = computed(() => getBirdImagePath(this.bird(), this.traitConfigs()));
 
-  altText() {
-    return `${this.bird().wingPhenotype}, ${this.bird().tailPhenotype} bird`;
-  }
+  genotypeDisplay = computed(() =>
+    this.traitConfigs()
+      .map((config) => this.bird().genotypes[config.id])
+      .join(' ')
+  );
+
+  altText = computed(() => {
+    const phenotypes = this.traitConfigs()
+      .map((config) => this.bird().phenotypes[config.id])
+      .join(', ');
+    return `${phenotypes} bird`;
+  });
 
   handleClick() {
     if (this.selectable()) {

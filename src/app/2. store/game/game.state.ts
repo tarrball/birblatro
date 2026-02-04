@@ -1,11 +1,13 @@
-import { Bird, PunnettSquare, BreedingOutcome, WingGenotype, TailGenotype } from '../../3. shared/genetics';
+import { Bird, PunnettSquare, BreedingOutcome, Genotypes, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
 export type GamePhase = 'intro' | 'tutorial' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
 
 export interface BreedingResult {
-  wingSquare: PunnettSquare;
-  tailSquare: PunnettSquare;
+  /** Punnett squares for each trait */
+  squares: PunnettSquare[];
+  /** All possible outcomes with probabilities */
   outcomes: BreedingOutcome[];
+  /** Offspring produced from this breeding */
   offspring: Bird[];
 }
 
@@ -16,8 +18,10 @@ export interface GameState {
   selectedParent2Id: string | null;
   lastBreedingResult: BreedingResult | null;
   stepsRemaining: number;
-  goalWingGenotype: WingGenotype;
-  goalTailGenotype: TailGenotype;
+  /** Goal genotypes for each active trait */
+  goalGenotypes: Genotypes;
+  /** Active trait set ID */
+  activeTraitSetId: string;
 }
 
 export const initialGameState: GameState = {
@@ -27,6 +31,6 @@ export const initialGameState: GameState = {
   selectedParent2Id: null,
   lastBreedingResult: null,
   stepsRemaining: 3,
-  goalWingGenotype: 'WW',
-  goalTailGenotype: 'TT',
+  goalGenotypes: { wing: 'WW', tail: 'TT' },
+  activeTraitSetId: DEFAULT_TRAIT_SET_ID,
 };

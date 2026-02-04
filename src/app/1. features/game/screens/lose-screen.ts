@@ -1,5 +1,5 @@
-import { Component, input, output } from '@angular/core';
-import { WingGenotype, TailGenotype } from '../../../3. shared/genetics';
+import { Component, input, output, computed } from '@angular/core';
+import { Genotypes, TraitConfig } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-lose-screen',
@@ -15,7 +15,7 @@ import { WingGenotype, TailGenotype } from '../../../3. shared/genetics';
         <h3>Tip for Next Time</h3>
         <p>
           Think about which parent combinations give you the best chance
-          of getting closer to the goal genotype <strong>{{ goalWingGenotype() }} {{ goalTailGenotype() }}</strong>.
+          of getting closer to the goal genotype <strong>{{ goalGenotypesDisplay() }}</strong>.
         </p>
         <p class="hint">
           Remember: Homozygous parents (like WW × WW) always produce that same genotype in offspring!
@@ -92,8 +92,14 @@ import { WingGenotype, TailGenotype } from '../../../3. shared/genetics';
   `,
 })
 export class LoseScreenComponent {
-  goalWingGenotype = input.required<WingGenotype>();
-  goalTailGenotype = input.required<TailGenotype>();
+  goalGenotypes = input.required<Genotypes>();
+  traitConfigs = input.required<TraitConfig[]>();
 
   tryAgain = output();
+
+  goalGenotypesDisplay = computed(() =>
+    this.traitConfigs()
+      .map((config) => this.goalGenotypes()[config.id])
+      .join(' ')
+  );
 }

@@ -1,6 +1,6 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { BirdCardComponent } from '../components/bird-card';
-import { BirdWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhenotype } from '../../../3. shared/genetics';
+import { BirdWithPhenotype, Genotypes, Phenotypes, TraitConfig } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-win-screen',
@@ -14,15 +14,14 @@ import { BirdWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPheno
       </div>
 
       <div class="goal-bird">
-        <app-bird-card [bird]="winningBird()!" />
+        <app-bird-card [bird]="winningBird()!" [traitConfigs]="traitConfigs()" />
       </div>
 
       <div class="success-info">
         <h3>You did it!</h3>
         <p>
           By understanding how alleles combine in Punnett squares,
-          you successfully bred a bird with <strong>{{ goalWingPhenotype() }} ({{ goalWingGenotype() }})</strong>
-          and a <strong>{{ goalTailPhenotype() }} ({{ goalTailGenotype() }})</strong>.
+          you successfully bred a bird with <span [innerHTML]="goalDescription()"></span>.
         </p>
       </div>
 
@@ -98,10 +97,19 @@ import { BirdWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPheno
 })
 export class WinScreenComponent {
   winningBird = input.required<BirdWithPhenotype | null>();
-  goalWingGenotype = input.required<WingGenotype>();
-  goalTailGenotype = input.required<TailGenotype>();
-  goalWingPhenotype = input.required<WingPhenotype>();
-  goalTailPhenotype = input.required<TailPhenotype>();
+  goalGenotypes = input.required<Genotypes>();
+  goalPhenotypes = input.required<Phenotypes>();
+  traitConfigs = input.required<TraitConfig[]>();
 
   playAgain = output();
+
+  goalDescription = computed(() => {
+    return this.traitConfigs()
+      .map((config) => {
+        const phenotype = this.goalPhenotypes()[config.id];
+        const genotype = this.goalGenotypes()[config.id];
+        return `<strong>${phenotype} (${genotype})</strong>`;
+      })
+      .join(' and ');
+  });
 }

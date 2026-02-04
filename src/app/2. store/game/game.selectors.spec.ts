@@ -9,12 +9,12 @@ import {
   selectOffspring,
   selectWinningOffspring,
   selectStepsRemaining,
-  selectGoalGenotype,
-  selectGoalPhenotype,
+  selectGoalGenotypes,
+  selectGoalPhenotypes,
   selectCanBreed,
 } from './game.selectors';
 import { GameState, initialGameState } from './game.state';
-import { getStartingBirds } from '../../3. shared/genetics';
+import { getStartingBirds, createBird, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
 describe('Game Selectors', () => {
   const createState = (gameState: Partial<GameState>): { game: GameState } => ({
@@ -39,18 +39,22 @@ describe('Game Selectors', () => {
   describe('selectBirdsWithPhenotype', () => {
     it('adds phenotype information to birds', () => {
       const birds = getStartingBirds();
-      const state = createState({ birds });
+      const state = createState({ birds, activeTraitSetId: DEFAULT_TRAIT_SET_ID });
       const result = selectBirdsWithPhenotype(state);
 
       expect(result).toHaveLength(4);
-      expect(result[0].wingPhenotype).toBe('Large wings');
-      expect(result[0].tailPhenotype).toBe('Pointed tail');
+      expect(result[0].phenotypes['wing']).toBe('Large wings');
+      expect(result[0].phenotypes['tail']).toBe('Pointed tail');
     });
   });
 
   describe('selectSelectedParent1', () => {
     it('returns null when no parent selected', () => {
-      const state = createState({ birds: getStartingBirds(), selectedParent1Id: null });
+      const state = createState({
+        birds: getStartingBirds(),
+        selectedParent1Id: null,
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
       expect(selectSelectedParent1(state)).toBeNull();
     });
 
@@ -58,17 +62,22 @@ describe('Game Selectors', () => {
       const state = createState({
         birds: getStartingBirds(),
         selectedParent1Id: 'A',
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
       });
       const result = selectSelectedParent1(state);
       expect(result).not.toBeNull();
       expect(result!.id).toBe('A');
-      expect(result!.wingPhenotype).toBe('Large wings');
+      expect(result!.phenotypes['wing']).toBe('Large wings');
     });
   });
 
   describe('selectSelectedParent2', () => {
     it('returns null when no parent selected', () => {
-      const state = createState({ birds: getStartingBirds(), selectedParent2Id: null });
+      const state = createState({
+        birds: getStartingBirds(),
+        selectedParent2Id: null,
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
       expect(selectSelectedParent2(state)).toBeNull();
     });
 
@@ -76,11 +85,12 @@ describe('Game Selectors', () => {
       const state = createState({
         birds: getStartingBirds(),
         selectedParent2Id: 'B',
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
       });
       const result = selectSelectedParent2(state);
       expect(result).not.toBeNull();
       expect(result!.id).toBe('B');
-      expect(result!.wingPhenotype).toBe('Small wings');
+      expect(result!.phenotypes['wing']).toBe('Small wings');
     });
   });
 
@@ -103,48 +113,73 @@ describe('Game Selectors', () => {
 
   describe('selectOffspring', () => {
     it('returns empty array when no breeding result', () => {
-      const state = createState({});
+      const state = createState({ activeTraitSetId: DEFAULT_TRAIT_SET_ID });
       expect(selectOffspring(state)).toEqual([]);
     });
 
     it('returns offspring array with phenotypes when breeding result exists', () => {
       const state = createState({
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: {
-          wingSquare: { parent1Alleles: ['W', 'w'], parent2Alleles: ['W', 'w'], grid: ['WW', 'Ww', 'Ww', 'ww'] },
-          tailSquare: { parent1Alleles: ['T', 't'], parent2Alleles: ['T', 't'], grid: ['TT', 'Tt', 'Tt', 'tt'] },
+          squares: [
+            {
+              traitId: 'wing',
+              parent1Alleles: ['W', 'w'],
+              parent2Alleles: ['W', 'w'],
+              grid: ['WW', 'Ww', 'Ww', 'ww'],
+            },
+            {
+              traitId: 'tail',
+              parent1Alleles: ['T', 't'],
+              parent2Alleles: ['T', 't'],
+              grid: ['TT', 'Tt', 'Tt', 'tt'],
+            },
+          ],
           outcomes: [],
           offspring: [
-            { id: 'test1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-            { id: 'test2', wingGenotype: 'WW', tailGenotype: 'TT' },
+            createBird('test1', { wing: 'Ww', tail: 'Tt' }),
+            createBird('test2', { wing: 'WW', tail: 'TT' }),
           ],
         },
       });
       const result = selectOffspring(state);
       expect(result).toHaveLength(2);
-      expect(result[0].wingPhenotype).toBe('Medium wings');
-      expect(result[0].tailPhenotype).toBe('Standard tail');
-      expect(result[1].wingPhenotype).toBe('Large wings');
-      expect(result[1].tailPhenotype).toBe('Fan tail');
+      expect(result[0].phenotypes['wing']).toBe('Medium wings');
+      expect(result[0].phenotypes['tail']).toBe('Standard tail');
+      expect(result[1].phenotypes['wing']).toBe('Large wings');
+      expect(result[1].phenotypes['tail']).toBe('Fan tail');
     });
   });
 
   describe('selectWinningOffspring', () => {
     it('returns null when no breeding result', () => {
-      const state = createState({});
+      const state = createState({ activeTraitSetId: DEFAULT_TRAIT_SET_ID });
       expect(selectWinningOffspring(state)).toBeNull();
     });
 
     it('returns null when no offspring matches goal', () => {
       const state = createState({
-        goalWingGenotype: 'WW',
-        goalTailGenotype: 'TT',
+        goalGenotypes: { wing: 'WW', tail: 'TT' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: {
-          wingSquare: { parent1Alleles: ['W', 'w'], parent2Alleles: ['W', 'w'], grid: ['WW', 'Ww', 'Ww', 'ww'] },
-          tailSquare: { parent1Alleles: ['T', 't'], parent2Alleles: ['T', 't'], grid: ['TT', 'Tt', 'Tt', 'tt'] },
+          squares: [
+            {
+              traitId: 'wing',
+              parent1Alleles: ['W', 'w'],
+              parent2Alleles: ['W', 'w'],
+              grid: ['WW', 'Ww', 'Ww', 'ww'],
+            },
+            {
+              traitId: 'tail',
+              parent1Alleles: ['T', 't'],
+              parent2Alleles: ['T', 't'],
+              grid: ['TT', 'Tt', 'Tt', 'tt'],
+            },
+          ],
           outcomes: [],
           offspring: [
-            { id: 'test1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-            { id: 'test2', wingGenotype: 'ww', tailGenotype: 'tt' },
+            createBird('test1', { wing: 'Ww', tail: 'Tt' }),
+            createBird('test2', { wing: 'ww', tail: 'tt' }),
           ],
         },
       });
@@ -153,15 +188,27 @@ describe('Game Selectors', () => {
 
     it('returns the winning offspring when one matches the goal', () => {
       const state = createState({
-        goalWingGenotype: 'WW',
-        goalTailGenotype: 'TT',
+        goalGenotypes: { wing: 'WW', tail: 'TT' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: {
-          wingSquare: { parent1Alleles: ['W', 'W'], parent2Alleles: ['W', 'W'], grid: ['WW', 'WW', 'WW', 'WW'] },
-          tailSquare: { parent1Alleles: ['T', 'T'], parent2Alleles: ['T', 'T'], grid: ['TT', 'TT', 'TT', 'TT'] },
+          squares: [
+            {
+              traitId: 'wing',
+              parent1Alleles: ['W', 'W'],
+              parent2Alleles: ['W', 'W'],
+              grid: ['WW', 'WW', 'WW', 'WW'],
+            },
+            {
+              traitId: 'tail',
+              parent1Alleles: ['T', 'T'],
+              parent2Alleles: ['T', 'T'],
+              grid: ['TT', 'TT', 'TT', 'TT'],
+            },
+          ],
           outcomes: [],
           offspring: [
-            { id: 'loser', wingGenotype: 'Ww', tailGenotype: 'Tt' },
-            { id: 'winner', wingGenotype: 'WW', tailGenotype: 'TT' },
+            createBird('loser', { wing: 'Ww', tail: 'Tt' }),
+            createBird('winner', { wing: 'WW', tail: 'TT' }),
           ],
         },
       });
@@ -172,15 +219,25 @@ describe('Game Selectors', () => {
 
     it('uses dynamic goal from state', () => {
       const state = createState({
-        goalWingGenotype: 'ww',
-        goalTailGenotype: 'tt',
+        goalGenotypes: { wing: 'ww', tail: 'tt' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
         lastBreedingResult: {
-          wingSquare: { parent1Alleles: ['w', 'w'], parent2Alleles: ['w', 'w'], grid: ['ww', 'ww', 'ww', 'ww'] },
-          tailSquare: { parent1Alleles: ['t', 't'], parent2Alleles: ['t', 't'], grid: ['tt', 'tt', 'tt', 'tt'] },
-          outcomes: [],
-          offspring: [
-            { id: 'winner', wingGenotype: 'ww', tailGenotype: 'tt' },
+          squares: [
+            {
+              traitId: 'wing',
+              parent1Alleles: ['w', 'w'],
+              parent2Alleles: ['w', 'w'],
+              grid: ['ww', 'ww', 'ww', 'ww'],
+            },
+            {
+              traitId: 'tail',
+              parent1Alleles: ['t', 't'],
+              parent2Alleles: ['t', 't'],
+              grid: ['tt', 'tt', 'tt', 'tt'],
+            },
           ],
+          outcomes: [],
+          offspring: [createBird('winner', { wing: 'ww', tail: 'tt' })],
         },
       });
       const result = selectWinningOffspring(state);
@@ -196,21 +253,24 @@ describe('Game Selectors', () => {
     });
   });
 
-  describe('selectGoalGenotype', () => {
-    it('returns goal genotype', () => {
-      const state = createState({});
-      const result = selectGoalGenotype(state);
-      expect(result.wingGenotype).toBe('WW');
-      expect(result.tailGenotype).toBe('TT');
+  describe('selectGoalGenotypes', () => {
+    it('returns goal genotypes', () => {
+      const state = createState({ goalGenotypes: { wing: 'WW', tail: 'TT' } });
+      const result = selectGoalGenotypes(state);
+      expect(result['wing']).toBe('WW');
+      expect(result['tail']).toBe('TT');
     });
   });
 
-  describe('selectGoalPhenotype', () => {
-    it('returns goal phenotype', () => {
-      const state = createState({});
-      const result = selectGoalPhenotype(state);
-      expect(result.wingPhenotype).toBe('Large wings');
-      expect(result.tailPhenotype).toBe('Fan tail');
+  describe('selectGoalPhenotypes', () => {
+    it('returns goal phenotypes', () => {
+      const state = createState({
+        goalGenotypes: { wing: 'WW', tail: 'TT' },
+        activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+      });
+      const result = selectGoalPhenotypes(state);
+      expect(result['wing']).toBe('Large wings');
+      expect(result['tail']).toBe('Fan tail');
     });
   });
 

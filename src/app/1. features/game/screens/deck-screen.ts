@@ -1,6 +1,13 @@
 import { Component, input, output, signal, computed } from '@angular/core';
 import { BirdCardComponent } from '../components/bird-card';
-import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from '../../../3. shared/genetics';
+import {
+  BirdWithPhenotype,
+  getBirdImagePath,
+  Genotypes,
+  Phenotypes,
+  TraitConfig,
+  createBird,
+} from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-deck-screen',
@@ -19,8 +26,8 @@ import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from 
         <img [src]="goalImagePath()" alt="Goal bird" class="goal-image" />
         <div class="goal-text">
           <span class="goal-label">Goal:</span>
-          <strong>{{ goalWingPhenotype() }}</strong> + <strong>{{ goalTailPhenotype() }}</strong>
-          <span class="genotype">({{ goalWingGenotype() }} {{ goalTailGenotype() }})</span>
+          <strong>{{ goalPhenotypesDisplay() }}</strong>
+          <span class="genotype">({{ goalGenotypesDisplay() }})</span>
         </div>
       </div>
 
@@ -28,7 +35,7 @@ import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from 
         <div class="parent-slot" [class.filled]="selectedParent1()">
           <span class="slot-label">Parent 1:</span>
           @if (selectedParent1(); as p1) {
-            <span class="slot-value">{{ p1.wingPhenotype }}, {{ p1.tailPhenotype }}</span>
+            <span class="slot-value">{{ getParentPhenotypes(p1) }}</span>
           } @else {
             <span class="slot-empty">Select a bird</span>
           }
@@ -37,7 +44,7 @@ import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from 
         <div class="parent-slot" [class.filled]="selectedParent2()">
           <span class="slot-label">Parent 2:</span>
           @if (selectedParent2(); as p2) {
-            <span class="slot-value">{{ p2.wingPhenotype }}, {{ p2.tailPhenotype }}</span>
+            <span class="slot-value">{{ getParentPhenotypes(p2) }}</span>
           } @else {
             <span class="slot-empty">Select a bird</span>
           }
@@ -48,6 +55,7 @@ import { BirdWithPhenotype, getBirdImagePath, WingGenotype, TailGenotype } from 
         @for (bird of birds(); track bird.id) {
           <app-bird-card
             [bird]="bird"
+            [traitConfigs]="traitConfigs()"
             [selected]="isSelected(bird.id)"
             [selectable]="true"
             [highlightAsOffspring]="highlightedOffspringId() === bird.id"
@@ -243,19 +251,27 @@ export class DeckScreenComponent {
   selectedParent1 = input<BirdWithPhenotype | null>(null);
   selectedParent2 = input<BirdWithPhenotype | null>(null);
   stepsRemaining = input.required<number>();
-  goalWingGenotype = input.required<WingGenotype>();
-  goalTailGenotype = input.required<TailGenotype>();
-  goalWingPhenotype = input.required<string>();
-  goalTailPhenotype = input.required<string>();
+  goalGenotypes = input.required<Genotypes>();
+  goalPhenotypes = input.required<Phenotypes>();
+  traitConfigs = input.required<TraitConfig[]>();
+  canBreed = input.required<boolean>();
 
   goalImagePath = computed(() => {
-    return getBirdImagePath({
-      id: 'goal',
-      wingGenotype: this.goalWingGenotype(),
-      tailGenotype: this.goalTailGenotype(),
-    });
+    const goalBird = createBird('goal', this.goalGenotypes());
+    return getBirdImagePath(goalBird, this.traitConfigs());
   });
-  canBreed = input.required<boolean>();
+
+  goalGenotypesDisplay = computed(() =>
+    this.traitConfigs()
+      .map((config) => this.goalGenotypes()[config.id])
+      .join(' ')
+  );
+
+  goalPhenotypesDisplay = computed(() =>
+    this.traitConfigs()
+      .map((config) => this.goalPhenotypes()[config.id])
+      .join(' + ')
+  );
 
   selectParent1 = output<string>();
   selectParent2 = output<string>();
@@ -267,21 +283,19 @@ export class DeckScreenComponent {
   private hoveredBird = computed(() => {
     const hoveredId = this.hoveredBirdId();
     if (!hoveredId) return null;
-    return this.birds().find(p => p.id === hoveredId) || null;
+    return this.birds().find((p) => p.id === hoveredId) || null;
   });
 
-  // Computed signal that returns the ID of the offspring being hovered (if it has parents)
   highlightedOffspringId = computed(() => {
     const hoveredId = this.hoveredBirdId();
     if (!hoveredId) return null;
-    const bird = this.birds().find(p => p.id === hoveredId);
+    const bird = this.birds().find((p) => p.id === hoveredId);
     if (bird?.parentId1 && bird?.parentId2) {
       return hoveredId;
     }
     return null;
   });
 
-  // Computed signal that returns the set of parent IDs to highlight
   highlightedParentIds = computed(() => {
     const hovered = this.hoveredBird();
     if (!hovered || !hovered.parentId1 || !hovered.parentId2) {
@@ -289,6 +303,12 @@ export class DeckScreenComponent {
     }
     return new Set([hovered.parentId1, hovered.parentId2]);
   });
+
+  getParentPhenotypes(parent: BirdWithPhenotype): string {
+    return this.traitConfigs()
+      .map((config) => parent.phenotypes[config.id])
+      .join(', ');
+  }
 
   isSelected(birdId: string): boolean {
     return this.selectedParent1()?.id === birdId || this.selectedParent2()?.id === birdId;

@@ -1,6 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { BreedingResult } from './game.state';
-import { Bird, WingGenotype, TailGenotype } from '../../3. shared/genetics';
+import { Bird, Genotypes } from '../../3. shared/genetics';
 
 export const startGame = createAction('[Game] Start Game');
 
@@ -8,8 +8,8 @@ export const gameInitialized = createAction(
   '[Game] Game Initialized',
   props<{
     birds: Bird[];
-    goalWingGenotype: WingGenotype;
-    goalTailGenotype: TailGenotype;
+    goalGenotypes: Genotypes;
+    activeTraitSetId: string;
   }>()
 );
 

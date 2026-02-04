@@ -1,9 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, computed } from '@angular/core';
 import { BirdCardComponent } from '../components/bird-card';
 import { PunnettSquareComponent } from '../components/punnett-square';
 import { OutcomeProbabilitiesComponent } from '../components/outcome-probabilities';
 import { BreedingResult } from '../../../2. store/game';
-import { BirdWithPhenotype } from '../../../3. shared/genetics';
+import { BirdWithPhenotype, TraitConfig } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-result-screen',
@@ -16,25 +16,29 @@ import { BirdWithPhenotype } from '../../../3. shared/genetics';
       <div class="parents-section">
         <div class="parent">
           <span class="parent-label">Parent 1</span>
-          <app-bird-card [bird]="parent1()!" />
+          <app-bird-card [bird]="parent1()!" [traitConfigs]="traitConfigs()" />
         </div>
         <span class="cross-symbol">×</span>
         <div class="parent">
           <span class="parent-label">Parent 2</span>
-          <app-bird-card [bird]="parent2()!" />
+          <app-bird-card [bird]="parent2()!" [traitConfigs]="traitConfigs()" />
         </div>
       </div>
 
       <div class="punnett-section">
         <h3>Punnett Squares</h3>
         <div class="squares">
-          <app-punnett-square [square]="breedingResult().wingSquare" title="Wing Size (W/w)" />
-          <app-punnett-square [square]="breedingResult().tailSquare" title="Tail Type (T/t)" />
+          @for (square of breedingResult().squares; track square.traitId) {
+            <app-punnett-square [square]="square" [title]="getSquareTitle(square.traitId)" />
+          }
         </div>
       </div>
 
       <div class="probabilities-section">
-        <app-outcome-probabilities [outcomes]="breedingResult().outcomes" />
+        <app-outcome-probabilities
+          [outcomes]="breedingResult().outcomes"
+          [traitConfigs]="traitConfigs()"
+        />
       </div>
 
       <div class="offspring-section">
@@ -44,7 +48,7 @@ import { BirdWithPhenotype } from '../../../3. shared/genetics';
         </p>
         <div class="offspring-grid">
           @for (child of offspring(); track child.id) {
-            <app-bird-card [bird]="child" />
+            <app-bird-card [bird]="child" [traitConfigs]="traitConfigs()" />
           }
         </div>
       </div>
@@ -113,6 +117,7 @@ import { BirdWithPhenotype } from '../../../3. shared/genetics';
       display: flex;
       justify-content: center;
       gap: 48px;
+      flex-wrap: wrap;
     }
 
     .probabilities-section {
@@ -172,6 +177,21 @@ export class ResultScreenComponent {
   parent1 = input.required<BirdWithPhenotype | null>();
   parent2 = input.required<BirdWithPhenotype | null>();
   offspring = input.required<BirdWithPhenotype[]>();
+  traitConfigs = input.required<TraitConfig[]>();
 
   continueGame = output();
+
+  private traitConfigMap = computed(() => {
+    const map = new Map<string, TraitConfig>();
+    for (const config of this.traitConfigs()) {
+      map.set(config.id, config);
+    }
+    return map;
+  });
+
+  getSquareTitle(traitId: string): string {
+    const config = this.traitConfigMap().get(traitId);
+    if (!config) return traitId;
+    return `${config.displayName} (${config.alleles.dominant}/${config.alleles.recessive})`;
+  }
 }

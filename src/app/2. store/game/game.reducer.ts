@@ -10,7 +10,7 @@ export const gameReducer = createReducer(
   // startGame is handled by effects, which dispatches gameInitialized
   on(GameActions.startGame, (state) => state),
 
-  on(GameActions.gameInitialized, (state, { birds, goalWingGenotype, goalTailGenotype }) =>
+  on(GameActions.gameInitialized, (state, { birds, goalGenotypes, activeTraitSetId }) =>
     produce(state, (draft) => {
       draft.phase = 'deck';
       draft.birds = birds;
@@ -18,8 +18,8 @@ export const gameReducer = createReducer(
       draft.selectedParent2Id = null;
       draft.lastBreedingResult = null;
       draft.stepsRemaining = MAX_BREEDING_STEPS;
-      draft.goalWingGenotype = goalWingGenotype;
-      draft.goalTailGenotype = goalTailGenotype;
+      draft.goalGenotypes = goalGenotypes;
+      draft.activeTraitSetId = activeTraitSetId;
     })
   ),
 
@@ -64,9 +64,7 @@ export const gameReducer = createReducer(
     }
 
     const offspring = state.lastBreedingResult.offspring;
-    const winningOffspring = offspring.find((o) =>
-      isGoalBird(o, state.goalWingGenotype, state.goalTailGenotype)
-    );
+    const winningOffspring = offspring.find((o) => isGoalBird(o, state.goalGenotypes));
 
     return produce(state, (draft) => {
       draft.birds.push(...offspring);

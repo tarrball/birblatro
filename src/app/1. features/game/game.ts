@@ -8,12 +8,13 @@ import {
   selectSelectedParent1,
   selectSelectedParent2,
   selectStepsRemaining,
-  selectGoalGenotype,
-  selectGoalPhenotype,
+  selectGoalGenotypes,
+  selectGoalPhenotypes,
   selectCanBreed,
   selectLastBreedingResult,
   selectOffspring,
   selectWinningOffspring,
+  selectActiveTraitConfigs,
   startGame,
   selectParent1,
   selectParent2,
@@ -31,11 +32,19 @@ import { DeckScreenComponent } from './screens/deck-screen';
 import { ResultScreenComponent } from './screens/result-screen';
 import { WinScreenComponent } from './screens/win-screen';
 import { LoseScreenComponent } from './screens/lose-screen';
+import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [IntroScreenComponent, TutorialScreenComponent, DeckScreenComponent, ResultScreenComponent, WinScreenComponent, LoseScreenComponent],
+  imports: [
+    IntroScreenComponent,
+    TutorialScreenComponent,
+    DeckScreenComponent,
+    ResultScreenComponent,
+    WinScreenComponent,
+    LoseScreenComponent,
+  ],
   template: `
     @switch (phase()) {
       @case ('intro') {
@@ -50,10 +59,9 @@ import { LoseScreenComponent } from './screens/lose-screen';
           [selectedParent1]="selectedParent1()"
           [selectedParent2]="selectedParent2()"
           [stepsRemaining]="stepsRemaining()"
-          [goalWingGenotype]="goalGenotype().wingGenotype"
-          [goalTailGenotype]="goalGenotype().tailGenotype"
-          [goalWingPhenotype]="goalPhenotype().wingPhenotype"
-          [goalTailPhenotype]="goalPhenotype().tailPhenotype"
+          [goalGenotypes]="goalGenotypes()"
+          [goalPhenotypes]="goalPhenotypes()"
+          [traitConfigs]="traitConfigs()"
           [canBreed]="canBreed()"
           (selectParent1)="onSelectParent1($event)"
           (selectParent2)="onSelectParent2($event)"
@@ -68,6 +76,7 @@ import { LoseScreenComponent } from './screens/lose-screen';
             [parent1]="selectedParent1()"
             [parent2]="selectedParent2()"
             [offspring]="offspring()"
+            [traitConfigs]="traitConfigs()"
             (continueGame)="onContinue()"
           />
         }
@@ -75,17 +84,16 @@ import { LoseScreenComponent } from './screens/lose-screen';
       @case ('win') {
         <app-win-screen
           [winningBird]="winningOffspring()"
-          [goalWingGenotype]="goalGenotype().wingGenotype"
-          [goalTailGenotype]="goalGenotype().tailGenotype"
-          [goalWingPhenotype]="goalPhenotype().wingPhenotype"
-          [goalTailPhenotype]="goalPhenotype().tailPhenotype"
+          [goalGenotypes]="goalGenotypes()"
+          [goalPhenotypes]="goalPhenotypes()"
+          [traitConfigs]="traitConfigs()"
           (playAgain)="onReset()"
         />
       }
       @case ('lose') {
         <app-lose-screen
-          [goalWingGenotype]="goalGenotype().wingGenotype"
-          [goalTailGenotype]="goalGenotype().tailGenotype"
+          [goalGenotypes]="goalGenotypes()"
+          [traitConfigs]="traitConfigs()"
           (tryAgain)="onReset()"
         />
       }
@@ -107,8 +115,15 @@ export class GameComponent {
   selectedParent1 = toSignal(this.store.select(selectSelectedParent1), { initialValue: null });
   selectedParent2 = toSignal(this.store.select(selectSelectedParent2), { initialValue: null });
   stepsRemaining = toSignal(this.store.select(selectStepsRemaining), { initialValue: 3 });
-  goalGenotype = toSignal(this.store.select(selectGoalGenotype), { initialValue: { wingGenotype: 'WW' as const, tailGenotype: 'TT' as const } });
-  goalPhenotype = toSignal(this.store.select(selectGoalPhenotype), { initialValue: { wingPhenotype: 'Large wings' as const, tailPhenotype: 'Fan tail' as const } });
+  goalGenotypes = toSignal(this.store.select(selectGoalGenotypes), {
+    initialValue: { wing: 'WW', tail: 'TT' },
+  });
+  goalPhenotypes = toSignal(this.store.select(selectGoalPhenotypes), {
+    initialValue: { wing: 'Large wings', tail: 'Fan tail' },
+  });
+  traitConfigs = toSignal(this.store.select(selectActiveTraitConfigs), {
+    initialValue: getTraitConfigsForSet(DEFAULT_TRAIT_SET_ID),
+  });
   canBreed = toSignal(this.store.select(selectCanBreed), { initialValue: false });
   breedingResult = toSignal(this.store.select(selectLastBreedingResult), { initialValue: null });
   offspring = toSignal(this.store.select(selectOffspring), { initialValue: [] });

@@ -4,15 +4,23 @@ import { Store } from '@ngrx/store';
 import { map, withLatestFrom, filter } from 'rxjs/operators';
 
 import * as GameActions from './game.actions';
-import { selectBirds, selectSelectedParent1Id, selectSelectedParent2Id } from './game.selectors';
+import {
+  selectBirds,
+  selectSelectedParent1Id,
+  selectSelectedParent2Id,
+  selectActiveTraitSetId,
+  selectActiveTraitConfigs,
+} from './game.selectors';
 import { BreedingResult } from './game.state';
 import {
-  generatePunnettSquare,
+  generatePunnettSquares,
   calculateBreedingOutcomes,
   selectOffspring,
   getRandomGoal,
   getRandomStartingBirds,
   Bird,
+  createBird,
+  DEFAULT_TRAIT_SET_ID,
 } from '../../3. shared/genetics';
 import { RngService } from '../../3. shared/services';
 
@@ -43,12 +51,13 @@ export class GameEffects {
     this.actions$.pipe(
       ofType(GameActions.startGame),
       map(() => {
-        const goal = getRandomGoal(() => this.rng.random());
-        const birds = getRandomStartingBirds(goal.wingGenotype, goal.tailGenotype, () => this.rng.random());
+        const traitSetId = DEFAULT_TRAIT_SET_ID;
+        const goalGenotypes = getRandomGoal(traitSetId, () => this.rng.random());
+        const birds = getRandomStartingBirds(goalGenotypes, traitSetId, () => this.rng.random());
         return GameActions.gameInitialized({
           birds,
-          goalWingGenotype: goal.wingGenotype,
-          goalTailGenotype: goal.tailGenotype,
+          goalGenotypes,
+          activeTraitSetId: traitSetId,
         });
       })
     )
@@ -60,30 +69,26 @@ export class GameEffects {
       withLatestFrom(
         this.store.select(selectBirds),
         this.store.select(selectSelectedParent1Id),
-        this.store.select(selectSelectedParent2Id)
+        this.store.select(selectSelectedParent2Id),
+        this.store.select(selectActiveTraitConfigs)
       ),
       filter(([, , parent1Id, parent2Id]) => parent1Id !== null && parent2Id !== null),
-      map(([, birds, parent1Id, parent2Id]) => {
+      map(([, birds, parent1Id, parent2Id, traitConfigs]) => {
         const parent1 = birds.find((p) => p.id === parent1Id)!;
         const parent2 = birds.find((p) => p.id === parent2Id)!;
 
-        const wingSquare = generatePunnettSquare(parent1.wingGenotype, parent2.wingGenotype);
-        const tailSquare = generatePunnettSquare(parent1.tailGenotype, parent2.tailGenotype);
-        const outcomes = calculateBreedingOutcomes(parent1, parent2);
+        const squares = generatePunnettSquares(parent1, parent2, traitConfigs);
+        const outcomes = calculateBreedingOutcomes(parent1, parent2, traitConfigs);
 
         // Use RNG service for probability-based selection
         const selectedGenotypes = selectOffspring(outcomes, 2, () => this.rng.random());
         const ids = generateOffspringIds(birds, selectedGenotypes.length);
 
-        const offspring: Bird[] = selectedGenotypes.map((genotype, index) => ({
-          id: ids[index],
-          wingGenotype: genotype.wingGenotype,
-          tailGenotype: genotype.tailGenotype,
-          parentId1: parent1.id,
-          parentId2: parent2.id,
-        }));
+        const offspring: Bird[] = selectedGenotypes.map((genotypes, index) =>
+          createBird(ids[index], genotypes, parent1.id, parent2.id)
+        );
 
-        const result: BreedingResult = { wingSquare, tailSquare, outcomes, offspring };
+        const result: BreedingResult = { squares, outcomes, offspring };
 
         return GameActions.breedingComplete({ result });
       })
