@@ -74,9 +74,9 @@ export const selectOffspring = createSelector(
     result ? result.offspring.map((bird) => getBirdWithPhenotype(bird, traitConfigs)) : []
 );
 
-export const selectStepsRemaining = createSelector(
+export const selectBreedCount = createSelector(
   selectGameState,
-  (state) => state.stepsRemaining
+  (state) => state.breedCount
 );
 
 export const selectGoalGenotypes = createSelector(
@@ -107,7 +107,6 @@ export const selectWinningOffspring = createSelector(
 
 export const selectCanBreed = createSelector(
   selectBothParentsSelected,
-  selectStepsRemaining,
   selectPhase,
-  (bothSelected, steps, phase) => bothSelected && steps > 0 && phase === 'deck'
+  (bothSelected, phase) => bothSelected && phase === 'deck'
 );

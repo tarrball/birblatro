@@ -7,7 +7,7 @@ import {
   selectBirdsWithPhenotype,
   selectSelectedParent1,
   selectSelectedParent2,
-  selectStepsRemaining,
+  selectBreedCount,
   selectGoalGenotypes,
   selectGoalPhenotypes,
   selectCanBreed,
@@ -57,7 +57,7 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
           [birds]="birds()"
           [selectedParent1]="selectedParent1()"
           [selectedParent2]="selectedParent2()"
-          [stepsRemaining]="stepsRemaining()"
+          [breedCount]="breedCount()"
           [goalGenotypes]="goalGenotypes()"
           [goalPhenotypes]="goalPhenotypes()"
           [traitConfigs]="traitConfigs()"
@@ -113,7 +113,7 @@ export class GameComponent {
   birds = toSignal(this.store.select(selectBirdsWithPhenotype), { initialValue: [] });
   selectedParent1 = toSignal(this.store.select(selectSelectedParent1), { initialValue: null });
   selectedParent2 = toSignal(this.store.select(selectSelectedParent2), { initialValue: null });
-  stepsRemaining = toSignal(this.store.select(selectStepsRemaining), { initialValue: 3 });
+  breedCount = toSignal(this.store.select(selectBreedCount), { initialValue: 0 });
   goalGenotypes = toSignal(this.store.select(selectGoalGenotypes), {
     initialValue: { wing: 'WW', tail: 'TT' },
   });

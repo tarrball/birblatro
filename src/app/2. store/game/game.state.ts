@@ -17,7 +17,7 @@ export interface GameState {
   selectedParent1Id: string | null;
   selectedParent2Id: string | null;
   lastBreedingResult: BreedingResult | null;
-  stepsRemaining: number;
+  breedCount: number;
   /** Goal genotypes for each active trait */
   goalGenotypes: Genotypes;
   /** Active trait set ID */
@@ -30,7 +30,7 @@ export const initialGameState: GameState = {
   selectedParent1Id: null,
   selectedParent2Id: null,
   lastBreedingResult: null,
-  stepsRemaining: 3,
+  breedCount: 0,
   goalGenotypes: { wing: 'WW', tail: 'TT' },
   activeTraitSetId: DEFAULT_TRAIT_SET_ID,
 };

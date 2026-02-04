@@ -17,8 +17,8 @@ import {
     <div class="deck-container">
       <div class="header">
         <h2>Your Birds</h2>
-        <div class="steps-remaining">
-          Breeding steps remaining: <strong>{{ stepsRemaining() }}</strong>
+        <div class="breed-count">
+          Breeds: <strong>{{ breedCount() }}</strong>
         </div>
       </div>
 
@@ -102,7 +102,7 @@ import {
       margin: 0;
     }
 
-    .steps-remaining {
+    .breed-count {
       color: #6b7280;
       font-size: 0.875rem;
     }
@@ -250,7 +250,7 @@ export class DeckScreenComponent {
   birds = input.required<BirdWithPhenotype[]>();
   selectedParent1 = input<BirdWithPhenotype | null>(null);
   selectedParent2 = input<BirdWithPhenotype | null>(null);
-  stepsRemaining = input.required<number>();
+  breedCount = input.required<number>();
   goalGenotypes = input.required<Genotypes>();
   goalPhenotypes = input.required<Phenotypes>();
   traitConfigs = input.required<TraitConfig[]>();

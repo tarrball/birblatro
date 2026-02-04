@@ -2,7 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import { produce } from 'immer';
 import { GameState, initialGameState } from './game.state';
 import * as GameActions from './game.actions';
-import { isGoalBird, MAX_BREEDING_STEPS } from '../../3. shared/genetics';
+import { isGoalBird } from '../../3. shared/genetics';
 
 export const gameReducer = createReducer(
   initialGameState,
@@ -17,7 +17,7 @@ export const gameReducer = createReducer(
       draft.selectedParent1Id = null;
       draft.selectedParent2Id = null;
       draft.lastBreedingResult = null;
-      draft.stepsRemaining = MAX_BREEDING_STEPS;
+      draft.breedCount = 0;
       draft.goalGenotypes = goalGenotypes;
       draft.activeTraitSetId = activeTraitSetId;
     })
@@ -68,14 +68,12 @@ export const gameReducer = createReducer(
 
     return produce(state, (draft) => {
       draft.birds.push(...offspring);
-      draft.stepsRemaining -= 1;
+      draft.breedCount += 1;
       draft.selectedParent1Id = null;
       draft.selectedParent2Id = null;
 
       if (winningOffspring) {
         draft.phase = 'win';
-      } else if (draft.stepsRemaining <= 0) {
-        draft.phase = 'lose';
       } else {
         draft.phase = 'deck';
       }

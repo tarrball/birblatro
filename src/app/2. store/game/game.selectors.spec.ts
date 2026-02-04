@@ -8,7 +8,7 @@ import {
   selectBothParentsSelected,
   selectOffspring,
   selectWinningOffspring,
-  selectStepsRemaining,
+  selectBreedCount,
   selectGoalGenotypes,
   selectGoalPhenotypes,
   selectCanBreed,
@@ -264,10 +264,10 @@ describe('Game Selectors', () => {
     });
   });
 
-  describe('selectStepsRemaining', () => {
-    it('returns steps remaining', () => {
-      const state = createState({ stepsRemaining: 2 });
-      expect(selectStepsRemaining(state)).toBe(2);
+  describe('selectBreedCount', () => {
+    it('returns breed count', () => {
+      const state = createState({ breedCount: 2 });
+      expect(selectBreedCount(state)).toBe(2);
     });
   });
 
@@ -308,7 +308,6 @@ describe('Game Selectors', () => {
         phase: 'result',
         selectedParent1Id: 'A',
         selectedParent2Id: 'B',
-        stepsRemaining: 3,
       });
       expect(selectCanBreed(state)).toBe(false);
     });
@@ -316,27 +315,15 @@ describe('Game Selectors', () => {
     it('returns false when parents not selected', () => {
       const state = createState({
         phase: 'deck',
-        stepsRemaining: 3,
       });
       expect(selectCanBreed(state)).toBe(false);
     });
 
-    it('returns false when no steps remaining', () => {
+    it('returns true when both parents selected in deck phase', () => {
       const state = createState({
         phase: 'deck',
         selectedParent1Id: 'A',
         selectedParent2Id: 'B',
-        stepsRemaining: 0,
-      });
-      expect(selectCanBreed(state)).toBe(false);
-    });
-
-    it('returns true when all conditions met', () => {
-      const state = createState({
-        phase: 'deck',
-        selectedParent1Id: 'A',
-        selectedParent2Id: 'B',
-        stepsRemaining: 3,
       });
       expect(selectCanBreed(state)).toBe(true);
     });
