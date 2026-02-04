@@ -5,7 +5,7 @@ import { Component, output } from '@angular/core';
   standalone: true,
   template: `
     <div class="intro-container">
-      <h1 class="title">Untitled Bird Breeding Game</h1>
+      <h1 class="title">Untitled Bird-breeding Game</h1>
       <p class="subtitle">Learn genetics by breeding birds!</p>
 
       <div class="button-group">

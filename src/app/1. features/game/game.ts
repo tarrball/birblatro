@@ -162,7 +162,7 @@ export class GameComponent {
   screenAnnouncementText = () => {
     const phase = this.phase();
     const announcements: Record<string, string> = {
-      intro: 'Welcome to Birblatro. Press Start Game to begin or How to Play to learn.',
+      intro: 'Welcome to UBG, the Untitled Bird-breeding Game. Press Start Game to begin or How to Play to learn.',
       tutorial: 'How to Play screen. Learn about genetics and Punnett squares.',
       starting: 'Creating your game. Please wait.',
       deck: 'Game started. Select two parent birds to breed.',
