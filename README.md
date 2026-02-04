@@ -1,59 +1,109 @@
-# App
+# UBG: Untitled Bird-breeding Game
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.2.
+An educational web game that teaches Mendelian genetics through bird breeding. Designed for 8th grade science students to learn about Punnett squares, genotypes, and phenotypes in an engaging, hands-on way.
 
-## Development server
+## The Game
 
-To start a local development server, run:
+Players breed birds to achieve a target phenotype. Each breeding decision shows Punnett squares that predict offspring outcomes, reinforcing the connection between genetic probability and observable traits.
+
+**Core loop:**
+1. View your flock of birds with their traits (phenotypes) and genetics (genotypes)
+2. Select two parent birds to breed
+3. See Punnett squares showing possible offspring outcomes
+4. Receive an offspring and add it to your flock
+5. Repeat until you breed the goal bird
+
+## Genetics Model
+
+The game uses **incomplete dominance** to create three distinct phenotypes per trait:
+
+**Wing Size** (W/w alleles)
+| Genotype | Phenotype |
+|----------|-----------|
+| WW | Large wings |
+| Ww | Medium wings |
+| ww | Small wings |
+
+**Tail Type** (T/t alleles)
+| Genotype | Phenotype |
+|----------|-----------|
+| TT | Fan tail |
+| Tt | Standard tail |
+| tt | Pointed tail |
+
+This creates 9 possible phenotype combinations, teaching students that multiple traits segregate independently.
+
+## Tech Stack
+
+- **Angular 21** - Component framework
+- **NgRx** - State management
+- **Vitest** - Unit testing
+- **TypeScript** - Type safety
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm 9+
+
+### Installation
 
 ```bash
-ng serve
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Development
 
 ```bash
-ng generate component component-name
+npm start
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Navigate to `http://localhost:4200/`. The app reloads automatically on file changes.
+
+### Testing
 
 ```bash
-ng generate --help
+npm test
 ```
 
-## Building
-
-To build the project run:
+Run with coverage:
 
 ```bash
-ng build
+npm run test:coverage
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+### Build
 
 ```bash
-ng test
+npm run build
 ```
 
-## Running end-to-end tests
+Build artifacts are output to `dist/`.
 
-For end-to-end (e2e) testing, run:
+## Project Structure
 
-```bash
-ng e2e
+```
+src/app/
+├── 1. features/        # Feature modules (game screens)
+│   └── game/
+│       ├── components/ # Presentational components
+│       └── screens/    # Screen-level components
+├── 2. store/           # NgRx state management
+│   └── game/           # Game state, actions, reducer, selectors, effects
+└── 3. shared/          # Shared utilities
+    └── genetics/       # Pure functions for genetics calculations
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+## Accessibility
 
-## Additional Resources
+The game is fully keyboard-navigable and screen-reader friendly:
+- Skip link to main content
+- Semantic HTML tables for Punnett squares
+- ARIA labels and live regions
+- Focus management on screen transitions
+- Visible focus indicators
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## License
+
+MIT
