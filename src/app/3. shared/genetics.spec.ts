@@ -7,12 +7,12 @@ import {
   calculateProbabilities,
   calculateBreedingOutcomes,
   selectOffspring,
-  getPigeonImagePath,
-  isGoalPigeon,
-  getStartingPigeons,
+  getBirdImagePath,
+  isGoalBird,
+  getStartingBirds,
   GOAL_WING_GENOTYPE,
   GOAL_TAIL_GENOTYPE,
-  Pigeon,
+  Bird,
 } from './genetics';
 
 describe('Genetics Utilities', () => {
@@ -117,9 +117,9 @@ describe('Genetics Utilities', () => {
   });
 
   describe('calculateBreedingOutcomes', () => {
-    it('calculates combined outcomes for two pigeons', () => {
-      const parent1: Pigeon = { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' };
-      const parent2: Pigeon = { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' };
+    it('calculates combined outcomes for two birds', () => {
+      const parent1: Bird = { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' };
+      const parent2: Bird = { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
 
@@ -133,8 +133,8 @@ describe('Genetics Utilities', () => {
     });
 
     it('produces multiple outcomes for heterozygous parents', () => {
-      const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent1: Bird = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent2: Bird = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
 
@@ -154,8 +154,8 @@ describe('Genetics Utilities', () => {
 
   describe('selectOffspring', () => {
     it('selects the top 2 highest probability outcomes by default', () => {
-      const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent1: Bird = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent2: Bird = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
       const offspring = selectOffspring(outcomes);
@@ -166,8 +166,8 @@ describe('Genetics Utilities', () => {
     });
 
     it('respects the count parameter', () => {
-      const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent1: Bird = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent2: Bird = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
 
@@ -176,8 +176,8 @@ describe('Genetics Utilities', () => {
     });
 
     it('is deterministic across multiple calls', () => {
-      const parent1: Pigeon = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      const parent2: Pigeon = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent1: Bird = { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      const parent2: Bird = { id: 'D', wingGenotype: 'Ww', tailGenotype: 'Tt' };
 
       const outcomes = calculateBreedingOutcomes(parent1, parent2);
 
@@ -188,48 +188,48 @@ describe('Genetics Utilities', () => {
     });
   });
 
-  describe('getPigeonImagePath', () => {
-    it('generates correct path for WW TT pigeon (large wings, fan tail)', () => {
-      const pigeon: Pigeon = { id: '1', wingGenotype: 'WW', tailGenotype: 'TT' };
-      expect(getPigeonImagePath(pigeon)).toBe('pigeons/lwft-WWTT.png');
+  describe('getBirdImagePath', () => {
+    it('generates correct path for WW TT bird (large wings, fan tail)', () => {
+      const bird: Bird = { id: '1', wingGenotype: 'WW', tailGenotype: 'TT' };
+      expect(getBirdImagePath(bird)).toBe('birds/lwft-WWTT.png');
     });
 
-    it('generates correct path for ww tt pigeon (small wings, pointed tail)', () => {
-      const pigeon: Pigeon = { id: '2', wingGenotype: 'ww', tailGenotype: 'tt' };
-      expect(getPigeonImagePath(pigeon)).toBe('pigeons/swpt-wwtt.png');
+    it('generates correct path for ww tt bird (small wings, pointed tail)', () => {
+      const bird: Bird = { id: '2', wingGenotype: 'ww', tailGenotype: 'tt' };
+      expect(getBirdImagePath(bird)).toBe('birds/swpt-wwtt.png');
     });
 
-    it('generates correct path for Ww Tt pigeon (medium wings, standard tail)', () => {
-      const pigeon: Pigeon = { id: '3', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      expect(getPigeonImagePath(pigeon)).toBe('pigeons/mwst-WwTt.png');
-    });
-  });
-
-  describe('isGoalPigeon', () => {
-    it('returns true for goal pigeon', () => {
-      const pigeon: Pigeon = { id: '1', wingGenotype: 'WW', tailGenotype: 'TT' };
-      expect(isGoalPigeon(pigeon, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE)).toBe(true);
-    });
-
-    it('returns false for non-goal pigeon', () => {
-      const pigeon: Pigeon = { id: '2', wingGenotype: 'Ww', tailGenotype: 'Tt' };
-      expect(isGoalPigeon(pigeon, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE)).toBe(false);
+    it('generates correct path for Ww Tt bird (medium wings, standard tail)', () => {
+      const bird: Bird = { id: '3', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      expect(getBirdImagePath(bird)).toBe('birds/mwst-WwTt.png');
     });
   });
 
-  describe('getStartingPigeons', () => {
-    it('returns 4 starting pigeons', () => {
-      const pigeons = getStartingPigeons();
-      expect(pigeons).toHaveLength(4);
+  describe('isGoalBird', () => {
+    it('returns true for goal bird', () => {
+      const bird: Bird = { id: '1', wingGenotype: 'WW', tailGenotype: 'TT' };
+      expect(isGoalBird(bird, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE)).toBe(true);
     });
 
-    it('returns pigeons with correct genotypes per spec', () => {
-      const pigeons = getStartingPigeons();
+    it('returns false for non-goal bird', () => {
+      const bird: Bird = { id: '2', wingGenotype: 'Ww', tailGenotype: 'Tt' };
+      expect(isGoalBird(bird, GOAL_WING_GENOTYPE, GOAL_TAIL_GENOTYPE)).toBe(false);
+    });
+  });
 
-      expect(pigeons[0]).toEqual({ id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' });
-      expect(pigeons[1]).toEqual({ id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' });
-      expect(pigeons[2]).toEqual({ id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' });
-      expect(pigeons[3]).toEqual({ id: 'D', wingGenotype: 'Ww', tailGenotype: 'tt' });
+  describe('getStartingBirds', () => {
+    it('returns 4 starting birds', () => {
+      const birds = getStartingBirds();
+      expect(birds).toHaveLength(4);
+    });
+
+    it('returns birds with correct genotypes per spec', () => {
+      const birds = getStartingBirds();
+
+      expect(birds[0]).toEqual({ id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' });
+      expect(birds[1]).toEqual({ id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' });
+      expect(birds[2]).toEqual({ id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' });
+      expect(birds[3]).toEqual({ id: 'D', wingGenotype: 'Ww', tailGenotype: 'tt' });
     });
   });
 });

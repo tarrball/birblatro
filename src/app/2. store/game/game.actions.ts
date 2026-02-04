@@ -1,21 +1,21 @@
 import { createAction, props } from '@ngrx/store';
 import { BreedingResult } from './game.state';
-import { Pigeon, WingGenotype, TailGenotype } from '../../3. shared/genetics';
+import { Bird, WingGenotype, TailGenotype } from '../../3. shared/genetics';
 
 export const startGame = createAction('[Game] Start Game');
 
 export const gameInitialized = createAction(
   '[Game] Game Initialized',
   props<{
-    pigeons: Pigeon[];
+    birds: Bird[];
     goalWingGenotype: WingGenotype;
     goalTailGenotype: TailGenotype;
   }>()
 );
 
-export const selectParent1 = createAction('[Game] Select Parent 1', props<{ pigeonId: string }>());
+export const selectParent1 = createAction('[Game] Select Parent 1', props<{ birdId: string }>());
 
-export const selectParent2 = createAction('[Game] Select Parent 2', props<{ pigeonId: string }>());
+export const selectParent2 = createAction('[Game] Select Parent 2', props<{ birdId: string }>());
 
 export const clearParentSelection = createAction('[Game] Clear Parent Selection');
 
@@ -29,3 +29,7 @@ export const breedingComplete = createAction(
 export const continueFromResult = createAction('[Game] Continue From Result');
 
 export const resetGame = createAction('[Game] Reset Game');
+
+export const showTutorial = createAction('[Game] Show Tutorial');
+
+export const backToIntro = createAction('[Game] Back To Intro');

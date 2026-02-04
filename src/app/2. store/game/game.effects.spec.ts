@@ -4,16 +4,16 @@ import { toArray } from 'rxjs/operators';
 
 import * as GameActions from './game.actions';
 import { GameState, initialGameState } from './game.state';
-import { getStartingPigeons, generatePunnettSquare, calculateBreedingOutcomes, selectOffspring, Pigeon } from '../../3. shared/genetics';
+import { getStartingBirds, generatePunnettSquare, calculateBreedingOutcomes, selectOffspring, Bird } from '../../3. shared/genetics';
 
 // Test the breeding logic directly since the effect is a thin wrapper
 // The effect uses: generatePunnettSquare, calculateBreedingOutcomes, selectOffspring
 
 describe('GameEffects breeding logic', () => {
   describe('breeding A (WWtt) x B (wwTT)', () => {
-    const pigeons = getStartingPigeons();
-    const parentA = pigeons.find(p => p.id === 'A')!;
-    const parentB = pigeons.find(p => p.id === 'B')!;
+    const birds = getStartingBirds();
+    const parentA = birds.find(p => p.id === 'A')!;
+    const parentB = birds.find(p => p.id === 'B')!;
 
     it('generates correct wing Punnett square', () => {
       const wingSquare = generatePunnettSquare(parentA.wingGenotype, parentB.wingGenotype);
@@ -60,9 +60,9 @@ describe('GameEffects breeding logic', () => {
   });
 
   describe('breeding C (WwTt) x D (Wwtt) - multiple outcomes', () => {
-    const pigeons = getStartingPigeons();
-    const parentC = pigeons.find(p => p.id === 'C')!;
-    const parentD = pigeons.find(p => p.id === 'D')!;
+    const birds = getStartingBirds();
+    const parentC = birds.find(p => p.id === 'C')!;
+    const parentD = birds.find(p => p.id === 'D')!;
 
     it('calculates multiple outcomes with varying probabilities', () => {
       const outcomes = calculateBreedingOutcomes(parentC, parentD);
@@ -96,15 +96,15 @@ describe('GameEffects breeding logic', () => {
   });
 
   describe('offspring ID generation', () => {
-    it('generates unique IDs avoiding existing pigeon IDs', () => {
-      const existingPigeons: Pigeon[] = [
+    it('generates unique IDs avoiding existing bird IDs', () => {
+      const existingBirds: Bird[] = [
         { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
         { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
       ];
 
       // Simulate the ID generation logic from the effect
-      function generateOffspringIds(pigeons: Pigeon[], count: number): string[] {
-        const existingIds = new Set(pigeons.map(p => p.id));
+      function generateOffspringIds(birds: Bird[], count: number): string[] {
+        const existingIds = new Set(birds.map(p => p.id));
         const ids: string[] = [];
         let counter = 1;
 
@@ -120,7 +120,7 @@ describe('GameEffects breeding logic', () => {
         return ids;
       }
 
-      const newIds = generateOffspringIds(existingPigeons, 2);
+      const newIds = generateOffspringIds(existingBirds, 2);
 
       expect(newIds).toHaveLength(2);
       expect(newIds[0]).toBe('offspring-2'); // offspring-1 exists, so skip to 2
@@ -130,15 +130,15 @@ describe('GameEffects breeding logic', () => {
 
   describe('parent ID tracking', () => {
     it('offspring should have parent IDs set', () => {
-      const pigeons = getStartingPigeons();
-      const parentA = pigeons.find(p => p.id === 'A')!;
-      const parentB = pigeons.find(p => p.id === 'B')!;
+      const birds = getStartingBirds();
+      const parentA = birds.find(p => p.id === 'A')!;
+      const parentB = birds.find(p => p.id === 'B')!;
 
       const outcomes = calculateBreedingOutcomes(parentA, parentB);
       const selectedGenotypes = selectOffspring(outcomes, 2, () => 0.5);
 
       // Create offspring with parent IDs (simulating effect logic)
-      const offspring: Pigeon[] = selectedGenotypes.map((genotype, index) => ({
+      const offspring: Bird[] = selectedGenotypes.map((genotype, index) => ({
         id: `offspring-${index + 1}`,
         wingGenotype: genotype.wingGenotype,
         tailGenotype: genotype.tailGenotype,

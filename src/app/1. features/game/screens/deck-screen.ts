@@ -1,15 +1,15 @@
 import { Component, input, output, signal, computed } from '@angular/core';
-import { PigeonCardComponent } from '../components/pigeon-card';
-import { PigeonWithPhenotype } from '../../../3. shared/genetics';
+import { BirdCardComponent } from '../components/bird-card';
+import { BirdWithPhenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-deck-screen',
   standalone: true,
-  imports: [PigeonCardComponent],
+  imports: [BirdCardComponent],
   template: `
     <div class="deck-container">
       <div class="header">
-        <h2>Your Pigeons</h2>
+        <h2>Your Birds</h2>
         <div class="steps-remaining">
           Breeding steps remaining: <strong>{{ stepsRemaining() }}</strong>
         </div>
@@ -26,7 +26,7 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
           @if (selectedParent1(); as p1) {
             <span class="slot-value">{{ p1.wingPhenotype }}, {{ p1.tailPhenotype }}</span>
           } @else {
-            <span class="slot-empty">Select a pigeon</span>
+            <span class="slot-empty">Select a bird</span>
           }
         </div>
         <span class="plus">+</span>
@@ -35,21 +35,21 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
           @if (selectedParent2(); as p2) {
             <span class="slot-value">{{ p2.wingPhenotype }}, {{ p2.tailPhenotype }}</span>
           } @else {
-            <span class="slot-empty">Select a pigeon</span>
+            <span class="slot-empty">Select a bird</span>
           }
         </div>
       </div>
 
-      <div class="pigeons-grid">
-        @for (pigeon of pigeons(); track pigeon.id) {
-          <app-pigeon-card
-            [pigeon]="pigeon"
-            [selected]="isSelected(pigeon.id)"
+      <div class="birds-grid">
+        @for (bird of birds(); track bird.id) {
+          <app-bird-card
+            [bird]="bird"
+            [selected]="isSelected(bird.id)"
             [selectable]="true"
-            [highlightAsOffspring]="highlightedOffspringId() === pigeon.id"
-            [highlightAsParent]="highlightedParentIds().has(pigeon.id)"
-            (cardClick)="onPigeonClick($event)"
-            (cardHover)="onPigeonHover($event)"
+            [highlightAsOffspring]="highlightedOffspringId() === bird.id"
+            [highlightAsParent]="highlightedParentIds().has(bird.id)"
+            (cardClick)="onBirdClick($event)"
+            (cardHover)="onBirdHover($event)"
           />
         }
       </div>
@@ -161,7 +161,7 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
       font-weight: 300;
     }
 
-    .pigeons-grid {
+    .birds-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 16px;
@@ -212,9 +212,9 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
   `,
 })
 export class DeckScreenComponent {
-  pigeons = input.required<PigeonWithPhenotype[]>();
-  selectedParent1 = input<PigeonWithPhenotype | null>(null);
-  selectedParent2 = input<PigeonWithPhenotype | null>(null);
+  birds = input.required<BirdWithPhenotype[]>();
+  selectedParent1 = input<BirdWithPhenotype | null>(null);
+  selectedParent2 = input<BirdWithPhenotype | null>(null);
   stepsRemaining = input.required<number>();
   goalWingGenotype = input.required<string>();
   goalTailGenotype = input.required<string>();
@@ -227,20 +227,20 @@ export class DeckScreenComponent {
   clearSelection = output();
   confirmBreeding = output();
 
-  hoveredPigeonId = signal<string | null>(null);
+  hoveredBirdId = signal<string | null>(null);
 
-  private hoveredPigeon = computed(() => {
-    const hoveredId = this.hoveredPigeonId();
+  private hoveredBird = computed(() => {
+    const hoveredId = this.hoveredBirdId();
     if (!hoveredId) return null;
-    return this.pigeons().find(p => p.id === hoveredId) || null;
+    return this.birds().find(p => p.id === hoveredId) || null;
   });
 
   // Computed signal that returns the ID of the offspring being hovered (if it has parents)
   highlightedOffspringId = computed(() => {
-    const hoveredId = this.hoveredPigeonId();
+    const hoveredId = this.hoveredBirdId();
     if (!hoveredId) return null;
-    const pigeon = this.pigeons().find(p => p.id === hoveredId);
-    if (pigeon?.parentId1 && pigeon?.parentId2) {
+    const bird = this.birds().find(p => p.id === hoveredId);
+    if (bird?.parentId1 && bird?.parentId2) {
       return hoveredId;
     }
     return null;
@@ -248,30 +248,30 @@ export class DeckScreenComponent {
 
   // Computed signal that returns the set of parent IDs to highlight
   highlightedParentIds = computed(() => {
-    const hovered = this.hoveredPigeon();
+    const hovered = this.hoveredBird();
     if (!hovered || !hovered.parentId1 || !hovered.parentId2) {
       return new Set<string>();
     }
     return new Set([hovered.parentId1, hovered.parentId2]);
   });
 
-  isSelected(pigeonId: string): boolean {
-    return this.selectedParent1()?.id === pigeonId || this.selectedParent2()?.id === pigeonId;
+  isSelected(birdId: string): boolean {
+    return this.selectedParent1()?.id === birdId || this.selectedParent2()?.id === birdId;
   }
 
-  onPigeonClick(pigeonId: string) {
-    if (this.selectedParent1()?.id === pigeonId || this.selectedParent2()?.id === pigeonId) {
+  onBirdClick(birdId: string) {
+    if (this.selectedParent1()?.id === birdId || this.selectedParent2()?.id === birdId) {
       return;
     }
 
     if (!this.selectedParent1()) {
-      this.selectParent1.emit(pigeonId);
+      this.selectParent1.emit(birdId);
     } else if (!this.selectedParent2()) {
-      this.selectParent2.emit(pigeonId);
+      this.selectParent2.emit(birdId);
     }
   }
 
-  onPigeonHover(pigeonId: string | null) {
-    this.hoveredPigeonId.set(pigeonId);
+  onBirdHover(birdId: string | null) {
+    this.hoveredBirdId.set(birdId);
   }
 }

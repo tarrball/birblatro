@@ -4,7 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
   selectPhase,
-  selectPigeonsWithPhenotype,
+  selectBirdsWithPhenotype,
   selectSelectedParent1,
   selectSelectedParent2,
   selectStepsRemaining,
@@ -21,9 +21,12 @@ import {
   confirmBreeding,
   continueFromResult,
   resetGame,
+  showTutorial,
+  backToIntro,
 } from '../../2. store/game';
 
 import { IntroScreenComponent } from './screens/intro-screen';
+import { TutorialScreenComponent } from './screens/tutorial-screen';
 import { DeckScreenComponent } from './screens/deck-screen';
 import { ResultScreenComponent } from './screens/result-screen';
 import { WinScreenComponent } from './screens/win-screen';
@@ -32,15 +35,18 @@ import { LoseScreenComponent } from './screens/lose-screen';
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [IntroScreenComponent, DeckScreenComponent, ResultScreenComponent, WinScreenComponent, LoseScreenComponent],
+  imports: [IntroScreenComponent, TutorialScreenComponent, DeckScreenComponent, ResultScreenComponent, WinScreenComponent, LoseScreenComponent],
   template: `
     @switch (phase()) {
       @case ('intro') {
-        <app-intro-screen (startGame)="onStartGame()" />
+        <app-intro-screen (startGame)="onStartGame()" (showTutorial)="onShowTutorial()" />
+      }
+      @case ('tutorial') {
+        <app-tutorial-screen (startGame)="onStartGame()" (backToIntro)="onBackToIntro()" />
       }
       @case ('deck') {
         <app-deck-screen
-          [pigeons]="pigeons()"
+          [birds]="birds()"
           [selectedParent1]="selectedParent1()"
           [selectedParent2]="selectedParent2()"
           [stepsRemaining]="stepsRemaining()"
@@ -68,7 +74,7 @@ import { LoseScreenComponent } from './screens/lose-screen';
       }
       @case ('win') {
         <app-win-screen
-          [winningPigeon]="winningOffspring()"
+          [winningBird]="winningOffspring()"
           [goalWingGenotype]="goalGenotype().wingGenotype"
           [goalTailGenotype]="goalGenotype().tailGenotype"
           [goalWingPhenotype]="goalPhenotype().wingPhenotype"
@@ -97,7 +103,7 @@ export class GameComponent {
   private store = inject(Store);
 
   phase = toSignal(this.store.select(selectPhase), { initialValue: 'intro' as const });
-  pigeons = toSignal(this.store.select(selectPigeonsWithPhenotype), { initialValue: [] });
+  birds = toSignal(this.store.select(selectBirdsWithPhenotype), { initialValue: [] });
   selectedParent1 = toSignal(this.store.select(selectSelectedParent1), { initialValue: null });
   selectedParent2 = toSignal(this.store.select(selectSelectedParent2), { initialValue: null });
   stepsRemaining = toSignal(this.store.select(selectStepsRemaining), { initialValue: 3 });
@@ -112,12 +118,20 @@ export class GameComponent {
     this.store.dispatch(startGame());
   }
 
-  onSelectParent1(pigeonId: string) {
-    this.store.dispatch(selectParent1({ pigeonId }));
+  onShowTutorial() {
+    this.store.dispatch(showTutorial());
   }
 
-  onSelectParent2(pigeonId: string) {
-    this.store.dispatch(selectParent2({ pigeonId }));
+  onBackToIntro() {
+    this.store.dispatch(backToIntro());
+  }
+
+  onSelectParent1(birdId: string) {
+    this.store.dispatch(selectParent1({ birdId }));
+  }
+
+  onSelectParent2(birdId: string) {
+    this.store.dispatch(selectParent2({ birdId }));
   }
 
   onClearSelection() {

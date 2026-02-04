@@ -1,12 +1,12 @@
 import { Component, input, output } from '@angular/core';
-import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/genetics';
+import { BirdWithPhenotype, getBirdImagePath } from '../../../3. shared/genetics';
 
 @Component({
-  selector: 'app-pigeon-card',
+  selector: 'app-bird-card',
   standalone: true,
   template: `
     <div
-      class="pigeon-card"
+      class="bird-card"
       [class.selected]="selected()"
       [class.selectable]="selectable()"
       [class.highlight-offspring]="highlightAsOffspring()"
@@ -18,23 +18,23 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
       <img
         [src]="imagePath()"
         [alt]="altText()"
-        class="pigeon-image"
+        class="bird-image"
         (error)="onImageError($event)"
       />
-      <div class="pigeon-info">
+      <div class="bird-info">
         <div class="phenotype" title="Phenotype: The observable physical traits">
-          <span>{{ pigeon().wingPhenotype }}</span>
-          <span>{{ pigeon().tailPhenotype }}</span>
+          <span>{{ bird().wingPhenotype }}</span>
+          <span>{{ bird().tailPhenotype }}</span>
         </div>
         <div class="genotype" title="Genotype: The genetic makeup (allele pairs)">
           <span class="genotype-label">Genotype:</span>
-          <span class="genotype-value" title="Each letter represents an allele. Uppercase = dominant, lowercase = recessive">{{ pigeon().wingGenotype }} {{ pigeon().tailGenotype }}</span>
+          <span class="genotype-value" title="Each letter represents an allele. Uppercase = dominant, lowercase = recessive">{{ bird().wingGenotype }} {{ bird().tailGenotype }}</span>
         </div>
       </div>
     </div>
   `,
   styles: `
-    .pigeon-card {
+    .bird-card {
       border: 2px solid #e5e7eb;
       border-radius: 12px;
       padding: 16px;
@@ -44,36 +44,36 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
       cursor: default;
     }
 
-    .pigeon-card.selectable {
+    .bird-card.selectable {
       cursor: pointer;
     }
 
-    .pigeon-card.selectable:hover {
+    .bird-card.selectable:hover {
       border-color: #3b82f6;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
     }
 
-    .pigeon-card.selected {
+    .bird-card.selected {
       border-color: #3b82f6;
       background: #eff6ff;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
     }
 
-    .pigeon-card.highlight-offspring,
-    .pigeon-card.selectable.highlight-offspring:hover {
+    .bird-card.highlight-offspring,
+    .bird-card.selectable.highlight-offspring:hover {
       border-color: #8b5cf6;
       background: #f5f3ff;
       box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
     }
 
-    .pigeon-card.highlight-parent,
-    .pigeon-card.selectable.highlight-parent:hover {
+    .bird-card.highlight-parent,
+    .bird-card.selectable.highlight-parent:hover {
       border-color: #f59e0b;
       background: #fffbeb;
       box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
     }
 
-    .pigeon-image {
+    .bird-image {
       width: 150px;
       height: 150px;
       object-fit: contain;
@@ -81,7 +81,7 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
       display: block;
     }
 
-    .pigeon-info {
+    .bird-info {
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -109,8 +109,8 @@ import { PigeonWithPhenotype, getPigeonImagePath } from '../../../3. shared/gene
     }
   `,
 })
-export class PigeonCardComponent {
-  pigeon = input.required<PigeonWithPhenotype>();
+export class BirdCardComponent {
+  bird = input.required<BirdWithPhenotype>();
   selected = input<boolean>(false);
   selectable = input<boolean>(false);
   highlightAsOffspring = input<boolean>(false);
@@ -120,21 +120,21 @@ export class PigeonCardComponent {
   cardHover = output<string | null>();
 
   imagePath() {
-    return getPigeonImagePath(this.pigeon());
+    return getBirdImagePath(this.bird());
   }
 
   altText() {
-    return `${this.pigeon().wingPhenotype}, ${this.pigeon().tailPhenotype} pigeon`;
+    return `${this.bird().wingPhenotype}, ${this.bird().tailPhenotype} bird`;
   }
 
   handleClick() {
     if (this.selectable()) {
-      this.cardClick.emit(this.pigeon().id);
+      this.cardClick.emit(this.bird().id);
     }
   }
 
   handleMouseEnter() {
-    this.cardHover.emit(this.pigeon().id);
+    this.cardHover.emit(this.bird().id);
   }
 
   handleMouseLeave() {

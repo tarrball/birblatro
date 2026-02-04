@@ -1,17 +1,17 @@
-import { Pigeon, PunnettSquare, BreedingOutcome, WingGenotype, TailGenotype } from '../../3. shared/genetics';
+import { Bird, PunnettSquare, BreedingOutcome, WingGenotype, TailGenotype } from '../../3. shared/genetics';
 
-export type GamePhase = 'intro' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
+export type GamePhase = 'intro' | 'tutorial' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
 
 export interface BreedingResult {
   wingSquare: PunnettSquare;
   tailSquare: PunnettSquare;
   outcomes: BreedingOutcome[];
-  offspring: Pigeon[];
+  offspring: Bird[];
 }
 
 export interface GameState {
   phase: GamePhase;
-  pigeons: Pigeon[];
+  birds: Bird[];
   selectedParent1Id: string | null;
   selectedParent2Id: string | null;
   lastBreedingResult: BreedingResult | null;
@@ -22,7 +22,7 @@ export interface GameState {
 
 export const initialGameState: GameState = {
   phase: 'intro',
-  pigeons: [],
+  birds: [],
   selectedParent1Id: null,
   selectedParent2Id: null,
   lastBreedingResult: null,

@@ -1,5 +1,5 @@
 /**
- * Genetics utilities for Pigeon Punnett POC
+ * Genetics utilities for Bird Punnett POC
  * Uses incomplete dominance for both traits
  */
 
@@ -14,7 +14,7 @@ export type TailGenotype = 'TT' | 'Tt' | 'tt';
 export type WingPhenotype = 'Large wings' | 'Medium wings' | 'Small wings';
 export type TailPhenotype = 'Fan tail' | 'Standard tail' | 'Pointed tail';
 
-export interface Pigeon {
+export interface Bird {
   id: string;
   wingGenotype: WingGenotype;
   tailGenotype: TailGenotype;
@@ -22,7 +22,7 @@ export interface Pigeon {
   parentId2?: string;
 }
 
-export interface PigeonWithPhenotype extends Pigeon {
+export interface BirdWithPhenotype extends Bird {
   wingPhenotype: WingPhenotype;
   tailPhenotype: TailPhenotype;
 }
@@ -68,11 +68,11 @@ export function getTailPhenotype(genotype: TailGenotype): TailPhenotype {
   }
 }
 
-export function getPigeonWithPhenotype(pigeon: Pigeon): PigeonWithPhenotype {
+export function getBirdWithPhenotype(bird: Bird): BirdWithPhenotype {
   return {
-    ...pigeon,
-    wingPhenotype: getWingPhenotype(pigeon.wingGenotype),
-    tailPhenotype: getTailPhenotype(pigeon.tailGenotype),
+    ...bird,
+    wingPhenotype: getWingPhenotype(bird.wingGenotype),
+    tailPhenotype: getTailPhenotype(bird.tailGenotype),
   };
 }
 
@@ -133,7 +133,7 @@ export function calculateProbabilities(punnettSquare: PunnettSquare): OutcomePro
 }
 
 // Calculate combined breeding outcomes (both traits)
-export function calculateBreedingOutcomes(parent1: Pigeon, parent2: Pigeon): BreedingOutcome[] {
+export function calculateBreedingOutcomes(parent1: Bird, parent2: Bird): BreedingOutcome[] {
   const wingSquare = generatePunnettSquare(parent1.wingGenotype, parent2.wingGenotype);
   const tailSquare = generatePunnettSquare(parent1.tailGenotype, parent2.tailGenotype);
 
@@ -205,20 +205,20 @@ export function selectOffspring(
   return result;
 }
 
-// Generate image filename for a pigeon
-export function getPigeonImagePath(pigeon: Pigeon): string {
-  const wingAbbrev = pigeon.wingGenotype === 'WW' ? 'lw' : pigeon.wingGenotype === 'Ww' ? 'mw' : 'sw';
-  const tailAbbrev = pigeon.tailGenotype === 'TT' ? 'ft' : pigeon.tailGenotype === 'Tt' ? 'st' : 'pt';
-  return `pigeons/${wingAbbrev}${tailAbbrev}-${pigeon.wingGenotype}${pigeon.tailGenotype}.png`;
+// Generate image filename for a bird
+export function getBirdImagePath(bird: Bird): string {
+  const wingAbbrev = bird.wingGenotype === 'WW' ? 'lw' : bird.wingGenotype === 'Ww' ? 'mw' : 'sw';
+  const tailAbbrev = bird.tailGenotype === 'TT' ? 'ft' : bird.tailGenotype === 'Tt' ? 'st' : 'pt';
+  return `birds/${wingAbbrev}${tailAbbrev}-${bird.wingGenotype}${bird.tailGenotype}.png`;
 }
 
-// Check if a pigeon matches the goal
-export function isGoalPigeon(pigeon: Pigeon, goalWing: WingGenotype, goalTail: TailGenotype): boolean {
-  return pigeon.wingGenotype === goalWing && pigeon.tailGenotype === goalTail;
+// Check if a bird matches the goal
+export function isGoalBird(bird: Bird, goalWing: WingGenotype, goalTail: TailGenotype): boolean {
+  return bird.wingGenotype === goalWing && bird.tailGenotype === goalTail;
 }
 
-// Starting pigeons for the fixed run
-export function getStartingPigeons(): Pigeon[] {
+// Starting birds for the fixed run
+export function getStartingBirds(): Bird[] {
   return [
     { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
     { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
@@ -227,7 +227,7 @@ export function getStartingPigeons(): Pigeon[] {
   ];
 }
 
-// Goal pigeon configuration
+// Goal bird configuration
 export const GOAL_WING_GENOTYPE: WingGenotype = 'WW';
 export const GOAL_TAIL_GENOTYPE: TailGenotype = 'TT';
 export const MAX_BREEDING_STEPS = 10;
@@ -251,17 +251,17 @@ export function getRandomGoal(randomFn: () => number = Math.random): {
 }
 
 /**
- * Generates random starting pigeons, excluding the goal genotype.
+ * Generates random starting birds, excluding the goal genotype.
  * @param goalWing The goal wing genotype to exclude
  * @param goalTail The goal tail genotype to exclude
  * @param randomFn Optional random function (0-1). Defaults to Math.random.
- * @returns Array of 4 random pigeons that don't match the goal
+ * @returns Array of 4 random birds that don't match the goal
  */
-export function getRandomStartingPigeons(
+export function getRandomStartingBirds(
   goalWing: WingGenotype,
   goalTail: TailGenotype,
   randomFn: () => number = Math.random
-): Pigeon[] {
+): Bird[] {
   const ids = ['A', 'B', 'C', 'D'];
   return ids.map((id) => {
     let wingGenotype: WingGenotype;

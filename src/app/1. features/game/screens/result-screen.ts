@@ -1,14 +1,14 @@
 import { Component, input, output } from '@angular/core';
-import { PigeonCardComponent } from '../components/pigeon-card';
+import { BirdCardComponent } from '../components/bird-card';
 import { PunnettSquareComponent } from '../components/punnett-square';
 import { OutcomeProbabilitiesComponent } from '../components/outcome-probabilities';
 import { BreedingResult } from '../../../2. store/game';
-import { PigeonWithPhenotype } from '../../../3. shared/genetics';
+import { BirdWithPhenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-result-screen',
   standalone: true,
-  imports: [PigeonCardComponent, PunnettSquareComponent, OutcomeProbabilitiesComponent],
+  imports: [BirdCardComponent, PunnettSquareComponent, OutcomeProbabilitiesComponent],
   template: `
     <div class="result-container">
       <h2>Breeding Result</h2>
@@ -16,12 +16,12 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
       <div class="parents-section">
         <div class="parent">
           <span class="parent-label">Parent 1</span>
-          <app-pigeon-card [pigeon]="parent1()!" />
+          <app-bird-card [bird]="parent1()!" />
         </div>
         <span class="cross-symbol">×</span>
         <div class="parent">
           <span class="parent-label">Parent 2</span>
-          <app-pigeon-card [pigeon]="parent2()!" />
+          <app-bird-card [bird]="parent2()!" />
         </div>
       </div>
 
@@ -44,7 +44,7 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
         </p>
         <div class="offspring-grid">
           @for (child of offspring(); track child.id) {
-            <app-pigeon-card [pigeon]="child" />
+            <app-bird-card [bird]="child" />
           }
         </div>
       </div>
@@ -169,9 +169,9 @@ import { PigeonWithPhenotype } from '../../../3. shared/genetics';
 })
 export class ResultScreenComponent {
   breedingResult = input.required<BreedingResult>();
-  parent1 = input.required<PigeonWithPhenotype | null>();
-  parent2 = input.required<PigeonWithPhenotype | null>();
-  offspring = input.required<PigeonWithPhenotype[]>();
+  parent1 = input.required<BirdWithPhenotype | null>();
+  parent2 = input.required<BirdWithPhenotype | null>();
+  offspring = input.required<BirdWithPhenotype[]>();
 
   continueGame = output();
 }

@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   selectPhase,
-  selectPigeons,
-  selectPigeonsWithPhenotype,
+  selectBirds,
+  selectBirdsWithPhenotype,
   selectSelectedParent1,
   selectSelectedParent2,
   selectBothParentsSelected,
@@ -14,7 +14,7 @@ import {
   selectCanBreed,
 } from './game.selectors';
 import { GameState, initialGameState } from './game.state';
-import { getStartingPigeons } from '../../3. shared/genetics';
+import { getStartingBirds } from '../../3. shared/genetics';
 
 describe('Game Selectors', () => {
   const createState = (gameState: Partial<GameState>): { game: GameState } => ({
@@ -28,19 +28,19 @@ describe('Game Selectors', () => {
     });
   });
 
-  describe('selectPigeons', () => {
-    it('returns pigeons array', () => {
-      const pigeons = getStartingPigeons();
-      const state = createState({ pigeons });
-      expect(selectPigeons(state)).toEqual(pigeons);
+  describe('selectBirds', () => {
+    it('returns birds array', () => {
+      const birds = getStartingBirds();
+      const state = createState({ birds });
+      expect(selectBirds(state)).toEqual(birds);
     });
   });
 
-  describe('selectPigeonsWithPhenotype', () => {
-    it('adds phenotype information to pigeons', () => {
-      const pigeons = getStartingPigeons();
-      const state = createState({ pigeons });
-      const result = selectPigeonsWithPhenotype(state);
+  describe('selectBirdsWithPhenotype', () => {
+    it('adds phenotype information to birds', () => {
+      const birds = getStartingBirds();
+      const state = createState({ birds });
+      const result = selectBirdsWithPhenotype(state);
 
       expect(result).toHaveLength(4);
       expect(result[0].wingPhenotype).toBe('Large wings');
@@ -50,13 +50,13 @@ describe('Game Selectors', () => {
 
   describe('selectSelectedParent1', () => {
     it('returns null when no parent selected', () => {
-      const state = createState({ pigeons: getStartingPigeons(), selectedParent1Id: null });
+      const state = createState({ birds: getStartingBirds(), selectedParent1Id: null });
       expect(selectSelectedParent1(state)).toBeNull();
     });
 
-    it('returns the selected pigeon with phenotype', () => {
+    it('returns the selected bird with phenotype', () => {
       const state = createState({
-        pigeons: getStartingPigeons(),
+        birds: getStartingBirds(),
         selectedParent1Id: 'A',
       });
       const result = selectSelectedParent1(state);
@@ -68,13 +68,13 @@ describe('Game Selectors', () => {
 
   describe('selectSelectedParent2', () => {
     it('returns null when no parent selected', () => {
-      const state = createState({ pigeons: getStartingPigeons(), selectedParent2Id: null });
+      const state = createState({ birds: getStartingBirds(), selectedParent2Id: null });
       expect(selectSelectedParent2(state)).toBeNull();
     });
 
-    it('returns the selected pigeon with phenotype', () => {
+    it('returns the selected bird with phenotype', () => {
       const state = createState({
-        pigeons: getStartingPigeons(),
+        birds: getStartingBirds(),
         selectedParent2Id: 'B',
       });
       const result = selectSelectedParent2(state);

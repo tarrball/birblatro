@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { gameReducer } from './game.reducer';
 import { initialGameState, GameState, BreedingResult } from './game.state';
 import * as GameActions from './game.actions';
-import { MAX_BREEDING_STEPS, Pigeon } from '../../3. shared/genetics';
+import { MAX_BREEDING_STEPS, Bird } from '../../3. shared/genetics';
 
 // Helper to create a started game state
 function createStartedState(overrides: Partial<GameState> = {}): GameState {
-  const pigeons: Pigeon[] = [
+  const birds: Bird[] = [
     { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
     { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
     { id: 'C', wingGenotype: 'Ww', tailGenotype: 'Tt' },
@@ -16,7 +16,7 @@ function createStartedState(overrides: Partial<GameState> = {}): GameState {
   return gameReducer(
     initialGameState,
     GameActions.gameInitialized({
-      pigeons,
+      birds,
       goalWingGenotype: 'WW',
       goalTailGenotype: 'TT',
       ...overrides,
@@ -25,7 +25,7 @@ function createStartedState(overrides: Partial<GameState> = {}): GameState {
 }
 
 // Helper to create a breeding result
-function createBreedingResult(offspring: Pigeon[]): BreedingResult {
+function createBreedingResult(offspring: Bird[]): BreedingResult {
   return {
     wingSquare: {
       parent1Alleles: ['W', 'w'] as [string, string],
@@ -64,10 +64,10 @@ describe('Game Reducer', () => {
       expect(state.phase).toBe('deck');
     });
 
-    it('loads provided pigeons', () => {
+    it('loads provided birds', () => {
       const state = createStartedState();
-      expect(state.pigeons).toHaveLength(4);
-      expect(state.pigeons[0].id).toBe('A');
+      expect(state.birds).toHaveLength(4);
+      expect(state.birds[0].id).toBe('A');
     });
 
     it('sets the goal genotypes', () => {
@@ -90,7 +90,7 @@ describe('Game Reducer', () => {
       const state = gameReducer(
         previousState,
         GameActions.gameInitialized({
-          pigeons: [],
+          birds: [],
           goalWingGenotype: 'WW',
           goalTailGenotype: 'TT',
         })
@@ -101,31 +101,31 @@ describe('Game Reducer', () => {
   });
 
   describe('selectParent1', () => {
-    it('selects a pigeon as parent 1', () => {
+    it('selects a bird as parent 1', () => {
       const startedState = createStartedState();
-      const state = gameReducer(startedState, GameActions.selectParent1({ pigeonId: 'A' }));
+      const state = gameReducer(startedState, GameActions.selectParent1({ birdId: 'A' }));
       expect(state.selectedParent1Id).toBe('A');
     });
 
-    it('does not allow selecting the same pigeon as parent 2', () => {
+    it('does not allow selecting the same bird as parent 2', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'B' }));
       expect(state.selectedParent1Id).toBeNull();
     });
   });
 
   describe('selectParent2', () => {
-    it('selects a pigeon as parent 2', () => {
+    it('selects a bird as parent 2', () => {
       const startedState = createStartedState();
-      const state = gameReducer(startedState, GameActions.selectParent2({ pigeonId: 'B' }));
+      const state = gameReducer(startedState, GameActions.selectParent2({ birdId: 'B' }));
       expect(state.selectedParent2Id).toBe('B');
     });
 
-    it('does not allow selecting the same pigeon as parent 1', () => {
+    it('does not allow selecting the same bird as parent 1', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'A' }));
       expect(state.selectedParent2Id).toBeNull();
     });
   });
@@ -133,8 +133,8 @@ describe('Game Reducer', () => {
   describe('clearParentSelection', () => {
     it('clears both parent selections', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
       state = gameReducer(state, GameActions.clearParentSelection());
       expect(state.selectedParent1Id).toBeNull();
       expect(state.selectedParent2Id).toBeNull();
@@ -144,8 +144,8 @@ describe('Game Reducer', () => {
   describe('confirmBreeding', () => {
     it('returns same state (breeding handled by effects)', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
       const stateBeforeBreeding = state;
       state = gameReducer(state, GameActions.confirmBreeding());
       expect(state).toBe(stateBeforeBreeding);
@@ -178,7 +178,7 @@ describe('Game Reducer', () => {
   });
 
   describe('continueFromResult', () => {
-    it('adds all offspring to pigeons', () => {
+    it('adds all offspring to birds', () => {
       let state = createStartedState();
       const result = createBreedingResult([
         { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt', parentId1: 'A', parentId2: 'B' },
@@ -187,10 +187,10 @@ describe('Game Reducer', () => {
       state = gameReducer(state, GameActions.breedingComplete({ result }));
 
       state = gameReducer(state, GameActions.continueFromResult());
-      // 4 starting pigeons + 2 offspring = 6
-      expect(state.pigeons).toHaveLength(6);
-      expect(state.pigeons.find((p) => p.id === 'offspring-1')).toBeDefined();
-      expect(state.pigeons.find((p) => p.id === 'offspring-2')).toBeDefined();
+      // 4 starting birds + 2 offspring = 6
+      expect(state.birds).toHaveLength(6);
+      expect(state.birds.find((p) => p.id === 'offspring-1')).toBeDefined();
+      expect(state.birds.find((p) => p.id === 'offspring-2')).toBeDefined();
     });
 
     it('decrements steps remaining', () => {
@@ -207,14 +207,14 @@ describe('Game Reducer', () => {
     });
 
     it('transitions to lose phase when steps exhausted without winning', () => {
-      const pigeons: Pigeon[] = [
+      const birds: Bird[] = [
         { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
         { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
       ];
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
-        pigeons,
+        birds,
         stepsRemaining: 1,
         goalWingGenotype: 'WW',
         goalTailGenotype: 'TT',
@@ -230,14 +230,14 @@ describe('Game Reducer', () => {
     });
 
     it('transitions to win phase when any offspring matches the goal', () => {
-      const pigeons: Pigeon[] = [
+      const birds: Bird[] = [
         { id: 'A', wingGenotype: 'WW', tailGenotype: 'tt' },
         { id: 'B', wingGenotype: 'ww', tailGenotype: 'TT' },
       ];
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
-        pigeons,
+        birds,
         stepsRemaining: 2,
         goalWingGenotype: 'WW',
         goalTailGenotype: 'TT',
@@ -252,14 +252,14 @@ describe('Game Reducer', () => {
     });
 
     it('uses dynamic goal from state for win condition', () => {
-      const pigeons: Pigeon[] = [
+      const birds: Bird[] = [
         { id: 'A', wingGenotype: 'Ww', tailGenotype: 'Tt' },
       ];
       // Goal is ww tt (different from default)
       let state: GameState = {
         ...initialGameState,
         phase: 'result',
-        pigeons,
+        birds,
         stepsRemaining: 2,
         goalWingGenotype: 'ww',
         goalTailGenotype: 'tt',
@@ -274,8 +274,8 @@ describe('Game Reducer', () => {
 
     it('clears parent selection after continuing', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
       const result = createBreedingResult([
         { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
       ]);
@@ -296,8 +296,8 @@ describe('Game Reducer', () => {
   describe('resetGame', () => {
     it('returns to initial state', () => {
       let state = createStartedState();
-      state = gameReducer(state, GameActions.selectParent1({ pigeonId: 'A' }));
-      state = gameReducer(state, GameActions.selectParent2({ pigeonId: 'B' }));
+      state = gameReducer(state, GameActions.selectParent1({ birdId: 'A' }));
+      state = gameReducer(state, GameActions.selectParent2({ birdId: 'B' }));
       const result = createBreedingResult([
         { id: 'offspring-1', wingGenotype: 'Ww', tailGenotype: 'Tt' },
       ]);

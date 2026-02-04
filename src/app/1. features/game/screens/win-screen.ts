@@ -1,27 +1,27 @@
 import { Component, input, output } from '@angular/core';
-import { PigeonCardComponent } from '../components/pigeon-card';
-import { PigeonWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhenotype } from '../../../3. shared/genetics';
+import { BirdCardComponent } from '../components/bird-card';
+import { BirdWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhenotype } from '../../../3. shared/genetics';
 
 @Component({
   selector: 'app-win-screen',
   standalone: true,
-  imports: [PigeonCardComponent],
+  imports: [BirdCardComponent],
   template: `
     <div class="win-container">
       <div class="celebration">
         <h1>Congratulations!</h1>
-        <p class="win-message">You bred the goal pigeon!</p>
+        <p class="win-message">You bred the goal bird!</p>
       </div>
 
-      <div class="goal-pigeon">
-        <app-pigeon-card [pigeon]="winningPigeon()!" />
+      <div class="goal-bird">
+        <app-bird-card [bird]="winningBird()!" />
       </div>
 
       <div class="success-info">
         <h3>You did it!</h3>
         <p>
           By understanding how alleles combine in Punnett squares,
-          you successfully bred a pigeon with <strong>{{ goalWingPhenotype() }} ({{ goalWingGenotype() }})</strong>
+          you successfully bred a bird with <strong>{{ goalWingPhenotype() }} ({{ goalWingGenotype() }})</strong>
           and a <strong>{{ goalTailPhenotype() }} ({{ goalTailGenotype() }})</strong>.
         </p>
       </div>
@@ -53,7 +53,7 @@ import { PigeonWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhe
       margin: 8px 0 0 0;
     }
 
-    .goal-pigeon {
+    .goal-bird {
       padding: 24px;
       background: linear-gradient(135deg, #ecfdf5, #d1fae5);
       border-radius: 16px;
@@ -97,7 +97,7 @@ import { PigeonWithPhenotype, WingGenotype, TailGenotype, WingPhenotype, TailPhe
   `,
 })
 export class WinScreenComponent {
-  winningPigeon = input.required<PigeonWithPhenotype | null>();
+  winningBird = input.required<BirdWithPhenotype | null>();
   goalWingGenotype = input.required<WingGenotype>();
   goalTailGenotype = input.required<TailGenotype>();
   goalWingPhenotype = input.required<WingPhenotype>();

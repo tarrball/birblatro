@@ -2,7 +2,7 @@ import { createReducer, on } from '@ngrx/store';
 import { produce } from 'immer';
 import { GameState, initialGameState } from './game.state';
 import * as GameActions from './game.actions';
-import { isGoalPigeon, MAX_BREEDING_STEPS } from '../../3. shared/genetics';
+import { isGoalBird, MAX_BREEDING_STEPS } from '../../3. shared/genetics';
 
 export const gameReducer = createReducer(
   initialGameState,
@@ -10,10 +10,10 @@ export const gameReducer = createReducer(
   // startGame is handled by effects, which dispatches gameInitialized
   on(GameActions.startGame, (state) => state),
 
-  on(GameActions.gameInitialized, (state, { pigeons, goalWingGenotype, goalTailGenotype }) =>
+  on(GameActions.gameInitialized, (state, { birds, goalWingGenotype, goalTailGenotype }) =>
     produce(state, (draft) => {
       draft.phase = 'deck';
-      draft.pigeons = pigeons;
+      draft.birds = birds;
       draft.selectedParent1Id = null;
       draft.selectedParent2Id = null;
       draft.lastBreedingResult = null;
@@ -23,21 +23,21 @@ export const gameReducer = createReducer(
     })
   ),
 
-  on(GameActions.selectParent1, (state, { pigeonId }) => {
-    if (pigeonId === state.selectedParent2Id) {
+  on(GameActions.selectParent1, (state, { birdId }) => {
+    if (birdId === state.selectedParent2Id) {
       return state;
     }
     return produce(state, (draft) => {
-      draft.selectedParent1Id = pigeonId;
+      draft.selectedParent1Id = birdId;
     });
   }),
 
-  on(GameActions.selectParent2, (state, { pigeonId }) => {
-    if (pigeonId === state.selectedParent1Id) {
+  on(GameActions.selectParent2, (state, { birdId }) => {
+    if (birdId === state.selectedParent1Id) {
       return state;
     }
     return produce(state, (draft) => {
-      draft.selectedParent2Id = pigeonId;
+      draft.selectedParent2Id = birdId;
     });
   }),
 
@@ -65,11 +65,11 @@ export const gameReducer = createReducer(
 
     const offspring = state.lastBreedingResult.offspring;
     const winningOffspring = offspring.find((o) =>
-      isGoalPigeon(o, state.goalWingGenotype, state.goalTailGenotype)
+      isGoalBird(o, state.goalWingGenotype, state.goalTailGenotype)
     );
 
     return produce(state, (draft) => {
-      draft.pigeons.push(...offspring);
+      draft.birds.push(...offspring);
       draft.stepsRemaining -= 1;
       draft.selectedParent1Id = null;
       draft.selectedParent2Id = null;
@@ -84,5 +84,17 @@ export const gameReducer = createReducer(
     });
   }),
 
-  on(GameActions.resetGame, () => initialGameState)
+  on(GameActions.resetGame, () => initialGameState),
+
+  on(GameActions.showTutorial, (state) =>
+    produce(state, (draft) => {
+      draft.phase = 'tutorial';
+    })
+  ),
+
+  on(GameActions.backToIntro, (state) =>
+    produce(state, (draft) => {
+      draft.phase = 'intro';
+    })
+  )
 );
