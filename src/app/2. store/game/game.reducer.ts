@@ -7,8 +7,12 @@ import { isGoalBird } from '../../3. shared/genetics';
 export const gameReducer = createReducer(
   initialGameState,
 
-  // startGame is handled by effects, which dispatches gameInitialized
-  on(GameActions.startGame, (state) => state),
+  // startGame transitions to 'starting' phase while effects validate the game
+  on(GameActions.startGame, (state) =>
+    produce(state, (draft) => {
+      draft.phase = 'starting';
+    })
+  ),
 
   on(GameActions.gameInitialized, (state, { birds, goalGenotypes, activeTraitSetId }) =>
     produce(state, (draft) => {

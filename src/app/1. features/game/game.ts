@@ -27,6 +27,7 @@ import {
 
 import { IntroScreenComponent } from './screens/intro-screen';
 import { TutorialScreenComponent } from './screens/tutorial-screen';
+import { StartingScreenComponent } from './screens/starting-screen';
 import { DeckScreenComponent } from './screens/deck-screen';
 import { ResultScreenComponent } from './screens/result-screen';
 import { WinScreenComponent } from './screens/win-screen';
@@ -39,6 +40,7 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
   imports: [
     IntroScreenComponent,
     TutorialScreenComponent,
+    StartingScreenComponent,
     DeckScreenComponent,
     ResultScreenComponent,
     WinScreenComponent,
@@ -51,6 +53,9 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
       }
       @case ('tutorial') {
         <app-tutorial-screen (startGame)="onStartGame()" (backToIntro)="onBackToIntro()" />
+      }
+      @case ('starting') {
+        <app-starting-screen />
       }
       @case ('deck') {
         <app-deck-screen

@@ -1,6 +1,6 @@
 import { Bird, PunnettSquare, BreedingOutcome, Genotypes, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
-export type GamePhase = 'intro' | 'tutorial' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
+export type GamePhase = 'intro' | 'tutorial' | 'starting' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
 
 export interface BreedingResult {
   /** Punnett squares for each trait */

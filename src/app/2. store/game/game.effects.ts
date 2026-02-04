@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map, withLatestFrom, filter } from 'rxjs/operators';
+import { map, withLatestFrom, filter, delay } from 'rxjs/operators';
 
 import * as GameActions from './game.actions';
 import {
@@ -18,6 +18,8 @@ import {
   selectOffspring,
   getRandomGoal,
   getRandomStartingBirds,
+  getTraitConfigsForSet,
+  isGoalReachable,
   Bird,
   createBird,
   DEFAULT_TRAIT_SET_ID,
@@ -52,14 +54,35 @@ export class GameEffects {
       ofType(GameActions.startGame),
       map(() => {
         const traitSetId = DEFAULT_TRAIT_SET_ID;
-        const goalGenotypes = getRandomGoal(traitSetId, () => this.rng.random());
-        const birds = getRandomStartingBirds(goalGenotypes, traitSetId, () => this.rng.random());
+        const traitConfigs = getTraitConfigsForSet(traitSetId);
+        const maxAttempts = 100;
+
+        let goalGenotypes;
+        let birds;
+        let attempts = 0;
+
+        // Keep generating until we find a valid (winnable) game
+        do {
+          goalGenotypes = getRandomGoal(traitSetId, () => this.rng.random());
+          birds = getRandomStartingBirds(goalGenotypes, traitSetId, () => this.rng.random());
+          attempts++;
+        } while (
+          !isGoalReachable(birds, goalGenotypes, traitConfigs) &&
+          attempts < maxAttempts
+        );
+
+        // Log if we hit max attempts (shouldn't happen with proper allele coverage)
+        if (attempts >= maxAttempts) {
+          console.warn(`Game validation reached max attempts (${maxAttempts})`);
+        }
+
         return GameActions.gameInitialized({
           birds,
           goalGenotypes,
           activeTraitSetId: traitSetId,
         });
-      })
+      }),
+      delay(1500) // Show spinner for at least 1.5s
     )
   );
 

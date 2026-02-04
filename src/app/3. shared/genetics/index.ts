@@ -60,3 +60,7 @@ export {
   getRandomStartingBirds,
   MAX_BREEDING_STEPS,
 } from './breeding';
+
+// Game validation
+export { isGoalReachable, validateGame } from './validation';
+export type { ValidationResult } from './validation';

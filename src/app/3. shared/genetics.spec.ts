@@ -10,6 +10,8 @@ import {
   getStartingBirds,
   getRandomGoal,
   getRandomStartingBirds,
+  isGoalReachable,
+  validateGame,
   Bird,
   createBird,
   getPhenotype,
@@ -400,6 +402,134 @@ describe('Genetics Utilities', () => {
         expect(getPhenotypeAbbreviation(WING_TRAIT, 'WW')).toBe('lw');
         expect(getPhenotypeAbbreviation(WING_TRAIT, 'Ww')).toBe('mw');
         expect(getPhenotypeAbbreviation(WING_TRAIT, 'ww')).toBe('sw');
+      });
+    });
+  });
+
+  describe('Game Validation', () => {
+    describe('isGoalReachable', () => {
+      it('returns true when goal is already in starting birds', () => {
+        const birds = [
+          createBird('A', { wing: 'WW', tail: 'TT' }),
+          createBird('B', { wing: 'ww', tail: 'tt' }),
+        ];
+        const goal = { wing: 'WW', tail: 'TT' };
+
+        expect(isGoalReachable(birds, goal, standardTraitConfigs)).toBe(true);
+      });
+
+      it('returns true when goal is reachable in one generation', () => {
+        // Ww x Ww can produce WW
+        const birds = [
+          createBird('A', { wing: 'Ww', tail: 'TT' }),
+          createBird('B', { wing: 'Ww', tail: 'TT' }),
+        ];
+        const goal = { wing: 'WW', tail: 'TT' };
+
+        expect(isGoalReachable(birds, goal, standardTraitConfigs)).toBe(true);
+      });
+
+      it('returns true when goal requires multiple generations', () => {
+        // Start with WW,tt and ww,TT -> can get Ww,Tt -> can eventually get WW,TT
+        const birds = [
+          createBird('A', { wing: 'WW', tail: 'tt' }),
+          createBird('B', { wing: 'ww', tail: 'TT' }),
+        ];
+        const goal = { wing: 'WW', tail: 'TT' };
+
+        expect(isGoalReachable(birds, goal, standardTraitConfigs)).toBe(true);
+      });
+
+      it('returns false when goal requires allele not present', () => {
+        // Only have WW - cannot produce ww
+        const birds = [
+          createBird('A', { wing: 'WW', tail: 'TT' }),
+          createBird('B', { wing: 'WW', tail: 'Tt' }),
+        ];
+        const goal = { wing: 'ww', tail: 'TT' };
+
+        expect(isGoalReachable(birds, goal, standardTraitConfigs)).toBe(false);
+      });
+
+      it('returns false when goal requires recessive allele not present', () => {
+        // Only have TT - cannot produce tt
+        const birds = [
+          createBird('A', { wing: 'Ww', tail: 'TT' }),
+          createBird('B', { wing: 'Ww', tail: 'TT' }),
+        ];
+        const goal = { wing: 'WW', tail: 'tt' };
+
+        expect(isGoalReachable(birds, goal, standardTraitConfigs)).toBe(false);
+      });
+
+      it('respects maxGenerations limit', () => {
+        const birds = [
+          createBird('A', { wing: 'WW', tail: 'tt' }),
+          createBird('B', { wing: 'ww', tail: 'TT' }),
+        ];
+        const goal = { wing: 'WW', tail: 'TT' };
+
+        // With 0 max generations, goal is not in starting set
+        expect(isGoalReachable(birds, goal, standardTraitConfigs, 0)).toBe(false);
+
+        // With enough generations, it should be reachable
+        expect(isGoalReachable(birds, goal, standardTraitConfigs, 10)).toBe(true);
+      });
+
+      it('works with single-trait configurations', () => {
+        const basicTraitConfigs = getTraitConfigsForSet('basic');
+        const birds = [
+          createBird('A', { wing: 'Ww' }),
+          createBird('B', { wing: 'Ww' }),
+        ];
+
+        expect(isGoalReachable(birds, { wing: 'WW' }, basicTraitConfigs)).toBe(true);
+        expect(isGoalReachable(birds, { wing: 'ww' }, basicTraitConfigs)).toBe(true);
+        expect(isGoalReachable(birds, { wing: 'Ww' }, basicTraitConfigs)).toBe(true);
+      });
+    });
+
+    describe('validateGame', () => {
+      it('returns validation result with details', () => {
+        const birds = [
+          createBird('A', { wing: 'Ww', tail: 'Tt' }),
+          createBird('B', { wing: 'Ww', tail: 'Tt' }),
+        ];
+        const goal = { wing: 'WW', tail: 'TT' };
+
+        const result = validateGame(birds, goal, standardTraitConfigs);
+
+        expect(result.isValid).toBe(true);
+        expect(result.generationsExplored).toBeGreaterThanOrEqual(0);
+        expect(result.genotypesDiscovered).toBeGreaterThan(0);
+      });
+
+      it('reports failure with details when goal is unreachable', () => {
+        const birds = [
+          createBird('A', { wing: 'WW', tail: 'TT' }),
+          createBird('B', { wing: 'WW', tail: 'TT' }),
+        ];
+        const goal = { wing: 'ww', tail: 'tt' };
+
+        const result = validateGame(birds, goal, standardTraitConfigs);
+
+        expect(result.isValid).toBe(false);
+        expect(result.generationsExplored).toBe(0); // Fast reject
+      });
+
+      it('validates the standard starting birds can reach any goal', () => {
+        const birds = getStartingBirds('standard');
+        const allGenotypes = ['WW', 'Ww', 'ww'];
+        const allTails = ['TT', 'Tt', 'tt'];
+
+        // Standard starting birds should be able to reach any combination
+        for (const wing of allGenotypes) {
+          for (const tail of allTails) {
+            const goal = { wing, tail };
+            const result = validateGame(birds, goal, standardTraitConfigs);
+            expect(result.isValid).toBe(true);
+          }
+        }
       });
     });
   });

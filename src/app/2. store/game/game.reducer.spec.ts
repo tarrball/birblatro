@@ -56,9 +56,9 @@ describe('Game Reducer', () => {
   });
 
   describe('startGame', () => {
-    it('returns same state (initialization handled by effects)', () => {
+    it('transitions to starting phase', () => {
       const state = gameReducer(initialGameState, GameActions.startGame());
-      expect(state).toBe(initialGameState);
+      expect(state.phase).toBe('starting');
     });
   });
 
