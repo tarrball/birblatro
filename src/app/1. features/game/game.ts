@@ -21,7 +21,6 @@ import {
   clearParentSelection,
   confirmBreeding,
   continueFromResult,
-  resetGame,
   showTutorial,
   backToIntro,
 } from '../../2. store/game';
@@ -162,6 +161,6 @@ export class GameComponent {
   }
 
   onReset() {
-    this.store.dispatch(resetGame());
+    this.store.dispatch(startGame());
   }
 }
