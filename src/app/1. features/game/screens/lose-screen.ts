@@ -1,14 +1,35 @@
 import { Component, input, output, computed } from '@angular/core';
 import { Genotypes, TraitConfig } from '../../../3. shared/genetics';
+import { GameMode } from '../../../2. store/game';
 
 @Component({
   selector: 'app-lose-screen',
   standalone: true,
   template: `
     <div class="lose-container">
+      @if (gameMode() === 'challenge') {
+        <!-- Challenge mode final results -->
+        <header class="challenge-header">
+          <div class="stat">
+            <span class="stat-label">Rounds Completed</span>
+            <span class="stat-value">{{ challengeRound() - 1 }}</span>
+          </div>
+          <div class="stat score">
+            <span class="stat-label">Final Score</span>
+            <span class="stat-value">{{ challengeScore() }}</span>
+          </div>
+        </header>
+      }
+
       <div class="message">
-        <h1>Out of Steps!</h1>
-        <p class="lose-message">You ran out of breeding steps before reaching the goal.</p>
+        <h1>{{ gameMode() === 'challenge' ? 'Game Over!' : 'Out of Steps!' }}</h1>
+        <p class="lose-message">
+          @if (gameMode() === 'challenge') {
+            You ran out of breeds before reaching the goal.
+          } @else {
+            You ran out of breeding steps before reaching the goal.
+          }
+        </p>
       </div>
 
       <div class="tip-box">
@@ -22,7 +43,9 @@ import { Genotypes, TraitConfig } from '../../../3. shared/genetics';
         </p>
       </div>
 
-      <button class="try-again-button" (click)="tryAgain.emit()">Try Again</button>
+      <button class="try-again-button" (click)="tryAgain.emit()">
+        {{ gameMode() === 'challenge' ? 'Play Again' : 'Try Again' }}
+      </button>
     </div>
   `,
   styles: `
@@ -89,11 +112,52 @@ import { Genotypes, TraitConfig } from '../../../3. shared/genetics';
     .try-again-button:hover {
       background: #2563eb;
     }
+
+    /* Challenge mode styles */
+    .challenge-header {
+      display: flex;
+      justify-content: center;
+      gap: 48px;
+      padding: 16px 24px;
+      background: #1f2937;
+      border-radius: 12px;
+      color: white;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .stat-label {
+      font-size: 0.625rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.7;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .stat.score .stat-value {
+      color: #fbbf24;
+    }
   `,
 })
 export class LoseScreenComponent {
   goalGenotypes = input.required<Genotypes>();
   traitConfigs = input.required<TraitConfig[]>();
+
+  // Challenge mode inputs (optional)
+  gameMode = input<GameMode>('standard');
+  challengeScore = input<number>(0);
+  challengeRound = input<number>(1);
 
   tryAgain = output();
 

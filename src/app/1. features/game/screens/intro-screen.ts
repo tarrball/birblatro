@@ -11,6 +11,7 @@ import { Component, output } from '@angular/core';
       <div class="button-group">
         <button class="tutorial-button" (click)="showTutorial.emit()">How to Play</button>
         <button class="start-button" (click)="startGame.emit()">Start Game</button>
+        <button class="challenge-button" (click)="startChallengeGame.emit()">Challenge Mode</button>
       </div>
     </div>
   `,
@@ -78,9 +79,26 @@ import { Component, output } from '@angular/core';
     .start-button:hover {
       background: #2563eb;
     }
+
+    .challenge-button {
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 16px 48px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .challenge-button:hover {
+      background: #7c3aed;
+    }
   `,
 })
 export class IntroScreenComponent {
   startGame = output();
   showTutorial = output();
+  startChallengeGame = output();
 }

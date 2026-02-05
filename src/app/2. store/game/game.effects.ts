@@ -86,6 +86,42 @@ export class GameEffects {
     )
   );
 
+  startChallengeGame$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(GameActions.startChallengeGame),
+      map(() => {
+        const traitSetId = DEFAULT_TRAIT_SET_ID;
+        const traitConfigs = getTraitConfigsForSet(traitSetId);
+        const maxAttempts = 100;
+
+        let goalGenotypes;
+        let birds;
+        let attempts = 0;
+
+        // Keep generating until we find a valid (winnable) game
+        do {
+          goalGenotypes = getRandomGoal(traitSetId, () => this.rng.random());
+          birds = getRandomStartingBirds(goalGenotypes, traitSetId, () => this.rng.random());
+          attempts++;
+        } while (
+          !isGoalReachable(birds, goalGenotypes, traitConfigs) &&
+          attempts < maxAttempts
+        );
+
+        if (attempts >= maxAttempts) {
+          console.warn(`Challenge game validation reached max attempts (${maxAttempts})`);
+        }
+
+        return GameActions.challengeGameInitialized({
+          birds,
+          goalGenotypes,
+          activeTraitSetId: traitSetId,
+        });
+      }),
+      delay(1500)
+    )
+  );
+
   confirmBreeding$ = createEffect(() =>
     this.actions$.pipe(
       ofType(GameActions.confirmBreeding),

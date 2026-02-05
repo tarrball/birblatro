@@ -110,3 +110,24 @@ export const selectCanBreed = createSelector(
   selectPhase,
   (bothSelected, phase) => bothSelected && phase === 'deck'
 );
+
+// Challenge mode selectors
+export const selectGameMode = createSelector(
+  selectGameState,
+  (state) => state.gameMode
+);
+
+export const selectChallengeScore = createSelector(
+  selectGameState,
+  (state) => state.challengeScore
+);
+
+export const selectChallengeRound = createSelector(
+  selectGameState,
+  (state) => state.challengeRound
+);
+
+export const selectBreedsRemainingInRound = createSelector(
+  selectGameState,
+  (state) => state.breedsRemainingInRound
+);

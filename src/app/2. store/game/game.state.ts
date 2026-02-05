@@ -2,6 +2,8 @@ import { Bird, PunnettSquare, BreedingOutcome, Genotypes, DEFAULT_TRAIT_SET_ID }
 
 export type GamePhase = 'intro' | 'tutorial' | 'starting' | 'deck' | 'breed' | 'result' | 'win' | 'lose';
 
+export type GameMode = 'standard' | 'challenge';
+
 export interface BreedingResult {
   /** Punnett squares for each trait */
   squares: PunnettSquare[];
@@ -22,6 +24,14 @@ export interface GameState {
   goalGenotypes: Genotypes;
   /** Active trait set ID */
   activeTraitSetId: string;
+  /** Game mode - standard or challenge */
+  gameMode: GameMode;
+  /** Challenge mode: accumulated score across rounds */
+  challengeScore: number;
+  /** Challenge mode: current round number */
+  challengeRound: number;
+  /** Challenge mode: breeds remaining in current round (starts at 4) */
+  breedsRemainingInRound: number;
 }
 
 export const initialGameState: GameState = {
@@ -33,4 +43,8 @@ export const initialGameState: GameState = {
   breedCount: 0,
   goalGenotypes: { wing: 'WW', tail: 'TT' },
   activeTraitSetId: DEFAULT_TRAIT_SET_ID,
+  gameMode: 'standard',
+  challengeScore: 0,
+  challengeRound: 1,
+  breedsRemainingInRound: 4,
 };

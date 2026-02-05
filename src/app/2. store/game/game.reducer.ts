@@ -11,6 +11,7 @@ export const gameReducer = createReducer(
   on(GameActions.startGame, (state) =>
     produce(state, (draft) => {
       draft.phase = 'starting';
+      draft.gameMode = 'standard';
     })
   ),
 
@@ -24,6 +25,41 @@ export const gameReducer = createReducer(
       draft.breedCount = 0;
       draft.goalGenotypes = goalGenotypes;
       draft.activeTraitSetId = activeTraitSetId;
+      draft.gameMode = 'standard';
+    })
+  ),
+
+  // Challenge mode: start game
+  on(GameActions.startChallengeGame, (state) =>
+    produce(state, (draft) => {
+      draft.phase = 'starting';
+      draft.gameMode = 'challenge';
+    })
+  ),
+
+  // Challenge mode: game initialized
+  // Preserves score/round if already in challenge mode (continuing to next round)
+  on(GameActions.challengeGameInitialized, (state, { birds, goalGenotypes, activeTraitSetId }) =>
+    produce(state, (draft) => {
+      const isNewGame = state.gameMode !== 'challenge' || state.phase === 'intro' || state.phase === 'lose';
+
+      draft.phase = 'deck';
+      draft.birds = birds;
+      draft.selectedParent1Id = null;
+      draft.selectedParent2Id = null;
+      draft.lastBreedingResult = null;
+      draft.breedCount = 0;
+      draft.goalGenotypes = goalGenotypes;
+      draft.activeTraitSetId = activeTraitSetId;
+      draft.gameMode = 'challenge';
+
+      if (isNewGame) {
+        // Starting fresh challenge
+        draft.challengeScore = 0;
+        draft.challengeRound = 1;
+      }
+      // Otherwise preserve existing score/round from previous round
+      draft.breedsRemainingInRound = 4;
     })
   ),
 
@@ -70,6 +106,35 @@ export const gameReducer = createReducer(
     const offspring = state.lastBreedingResult.offspring;
     const winningOffspring = offspring.find((o) => isGoalBird(o, state.goalGenotypes));
 
+    // Challenge mode logic
+    if (state.gameMode === 'challenge') {
+      return produce(state, (draft) => {
+        draft.birds.push(...offspring);
+        draft.breedCount += 1;
+        draft.selectedParent1Id = null;
+        draft.selectedParent2Id = null;
+
+        if (winningOffspring) {
+          // Goal reached! Award points and advance round
+          const pointsEarned = draft.breedsRemainingInRound * 100;
+          draft.challengeScore += pointsEarned;
+          draft.challengeRound += 1;
+          draft.breedsRemainingInRound = 4;
+          draft.phase = 'win';
+        } else {
+          // Decrement breeds remaining
+          draft.breedsRemainingInRound -= 1;
+          if (draft.breedsRemainingInRound <= 0) {
+            // Out of breeds - game over
+            draft.phase = 'lose';
+          } else {
+            draft.phase = 'deck';
+          }
+        }
+      });
+    }
+
+    // Standard mode logic
     return produce(state, (draft) => {
       draft.birds.push(...offspring);
       draft.breedCount += 1;
@@ -83,6 +148,23 @@ export const gameReducer = createReducer(
       }
     });
   }),
+
+  // Challenge mode: round complete (triggered from win screen)
+  on(GameActions.challengeRoundComplete, (state, { pointsEarned }) =>
+    produce(state, (draft) => {
+      draft.challengeScore += pointsEarned;
+      draft.challengeRound += 1;
+      draft.breedsRemainingInRound = 4;
+      draft.phase = 'starting';
+    })
+  ),
+
+  // Challenge mode: game over
+  on(GameActions.challengeGameOver, (state) =>
+    produce(state, (draft) => {
+      draft.phase = 'lose';
+    })
+  ),
 
   on(GameActions.resetGame, () => initialGameState),
 

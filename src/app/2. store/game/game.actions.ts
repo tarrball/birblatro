@@ -33,3 +33,22 @@ export const resetGame = createAction('[Game] Reset Game');
 export const showTutorial = createAction('[Game] Show Tutorial');
 
 export const backToIntro = createAction('[Game] Back To Intro');
+
+// Challenge mode actions
+export const startChallengeGame = createAction('[Game] Start Challenge Game');
+
+export const challengeGameInitialized = createAction(
+  '[Game] Challenge Game Initialized',
+  props<{
+    birds: Bird[];
+    goalGenotypes: Genotypes;
+    activeTraitSetId: string;
+  }>()
+);
+
+export const challengeRoundComplete = createAction(
+  '[Game] Challenge Round Complete',
+  props<{ pointsEarned: number }>()
+);
+
+export const challengeGameOver = createAction('[Game] Challenge Game Over');

@@ -15,7 +15,12 @@ import {
   selectOffspring,
   selectWinningOffspring,
   selectActiveTraitConfigs,
+  selectGameMode,
+  selectChallengeScore,
+  selectChallengeRound,
+  selectBreedsRemainingInRound,
   startGame,
+  startChallengeGame,
   selectParent1,
   selectParent2,
   clearParentSelection,
@@ -32,6 +37,8 @@ import { DeckScreenComponent } from './screens/deck-screen';
 import { ResultScreenComponent } from './screens/result-screen';
 import { WinScreenComponent } from './screens/win-screen';
 import { LoseScreenComponent } from './screens/lose-screen';
+import { ChallengeDeckScreenComponent } from './screens/challenge-deck-screen';
+import { ChallengeResultScreenComponent } from './screens/challenge-result-screen';
 import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/genetics';
 
 @Component({
@@ -45,13 +52,19 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
     ResultScreenComponent,
     WinScreenComponent,
     LoseScreenComponent,
+    ChallengeDeckScreenComponent,
+    ChallengeResultScreenComponent,
   ],
   template: `
     <a href="#main-content" class="skip-link">Skip to main content</a>
     <div id="main-content" #mainContent tabindex="-1">
       @switch (phase()) {
         @case ('intro') {
-          <app-intro-screen (startGame)="onStartGame()" (showTutorial)="onShowTutorial()" />
+          <app-intro-screen
+            (startGame)="onStartGame()"
+            (showTutorial)="onShowTutorial()"
+            (startChallengeGame)="onStartChallengeGame()"
+          />
         }
         @case ('tutorial') {
           <app-tutorial-screen (startGame)="onStartGame()" (backToIntro)="onBackToIntro()" />
@@ -60,31 +73,65 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
           <app-starting-screen />
         }
         @case ('deck') {
-          <app-deck-screen
-            [birds]="birds()"
-            [selectedParent1]="selectedParent1()"
-            [selectedParent2]="selectedParent2()"
-            [breedCount]="breedCount()"
-            [goalGenotypes]="goalGenotypes()"
-            [goalPhenotypes]="goalPhenotypes()"
-            [traitConfigs]="traitConfigs()"
-            [canBreed]="canBreed()"
-            (selectParent1)="onSelectParent1($event)"
-            (selectParent2)="onSelectParent2($event)"
-            (clearSelection)="onClearSelection()"
-            (confirmBreeding)="onConfirmBreeding()"
-          />
+          @if (gameMode() === 'challenge') {
+            <app-challenge-deck-screen
+              [birds]="birds()"
+              [selectedParent1]="selectedParent1()"
+              [selectedParent2]="selectedParent2()"
+              [goalGenotypes]="goalGenotypes()"
+              [goalPhenotypes]="goalPhenotypes()"
+              [traitConfigs]="traitConfigs()"
+              [canBreed]="canBreed()"
+              [challengeRound]="challengeRound()"
+              [challengeScore]="challengeScore()"
+              [breedsRemaining]="breedsRemaining()"
+              (selectParent1)="onSelectParent1($event)"
+              (selectParent2)="onSelectParent2($event)"
+              (clearSelection)="onClearSelection()"
+              (confirmBreeding)="onConfirmBreeding()"
+            />
+          } @else {
+            <app-deck-screen
+              [birds]="birds()"
+              [selectedParent1]="selectedParent1()"
+              [selectedParent2]="selectedParent2()"
+              [breedCount]="breedCount()"
+              [goalGenotypes]="goalGenotypes()"
+              [goalPhenotypes]="goalPhenotypes()"
+              [traitConfigs]="traitConfigs()"
+              [canBreed]="canBreed()"
+              (selectParent1)="onSelectParent1($event)"
+              (selectParent2)="onSelectParent2($event)"
+              (clearSelection)="onClearSelection()"
+              (confirmBreeding)="onConfirmBreeding()"
+            />
+          }
         }
         @case ('result') {
           @if (breedingResult(); as result) {
-            <app-result-screen
-              [breedingResult]="result"
-              [parent1]="selectedParent1()"
-              [parent2]="selectedParent2()"
-              [offspring]="offspring()"
-              [traitConfigs]="traitConfigs()"
-              (continueGame)="onContinue()"
-            />
+            @if (gameMode() === 'challenge') {
+              <app-challenge-result-screen
+                [breedingResult]="result"
+                [parent1]="selectedParent1()"
+                [parent2]="selectedParent2()"
+                [offspring]="offspring()"
+                [traitConfigs]="traitConfigs()"
+                [goalGenotypes]="goalGenotypes()"
+                [challengeRound]="challengeRound()"
+                [challengeScore]="challengeScore()"
+                [breedsRemaining]="breedsRemaining()"
+                (continueGame)="onContinue()"
+              />
+            } @else {
+              <app-result-screen
+                [breedingResult]="result"
+                [parent1]="selectedParent1()"
+                [parent2]="selectedParent2()"
+                [offspring]="offspring()"
+                [traitConfigs]="traitConfigs()"
+                (continueGame)="onContinue()"
+              />
+            }
           }
         }
         @case ('win') {
@@ -93,13 +140,21 @@ import { getTraitConfigsForSet, DEFAULT_TRAIT_SET_ID } from '../../3. shared/gen
             [goalGenotypes]="goalGenotypes()"
             [goalPhenotypes]="goalPhenotypes()"
             [traitConfigs]="traitConfigs()"
+            [gameMode]="gameMode()"
+            [challengeScore]="challengeScore()"
+            [challengeRound]="challengeRound()"
+            [breedsRemaining]="breedsRemaining()"
             (playAgain)="onReset()"
+            (nextRound)="onNextRound()"
           />
         }
         @case ('lose') {
           <app-lose-screen
             [goalGenotypes]="goalGenotypes()"
             [traitConfigs]="traitConfigs()"
+            [gameMode]="gameMode()"
+            [challengeScore]="challengeScore()"
+            [challengeRound]="challengeRound()"
             (tryAgain)="onReset()"
           />
         }
@@ -156,6 +211,12 @@ export class GameComponent {
   offspring = toSignal(this.store.select(selectOffspring), { initialValue: [] });
   winningOffspring = toSignal(this.store.select(selectWinningOffspring), { initialValue: null });
 
+  // Challenge mode state
+  gameMode = toSignal(this.store.select(selectGameMode), { initialValue: 'standard' as const });
+  challengeScore = toSignal(this.store.select(selectChallengeScore), { initialValue: 0 });
+  challengeRound = toSignal(this.store.select(selectChallengeRound), { initialValue: 1 });
+  breedsRemaining = toSignal(this.store.select(selectBreedsRemainingInRound), { initialValue: 4 });
+
   private previousPhase: string | null = null;
 
   // Screen announcements for screen readers
@@ -194,6 +255,10 @@ export class GameComponent {
     this.store.dispatch(startGame());
   }
 
+  onStartChallengeGame() {
+    this.store.dispatch(startChallengeGame());
+  }
+
   onShowTutorial() {
     this.store.dispatch(showTutorial());
   }
@@ -223,6 +288,16 @@ export class GameComponent {
   }
 
   onReset() {
-    this.store.dispatch(startGame());
+    // For challenge mode lose screen, start a new challenge game
+    if (this.gameMode() === 'challenge') {
+      this.store.dispatch(startChallengeGame());
+    } else {
+      this.store.dispatch(startGame());
+    }
+  }
+
+  onNextRound() {
+    // Start next challenge round
+    this.store.dispatch(startChallengeGame());
   }
 }
